@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "LA Faux Pass"
 include(":app")
-include(":rta_animation")

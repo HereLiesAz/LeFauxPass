@@ -1,13 +1,26 @@
-package com.hereliesaz.rta_animation
+package com.hereliesaz.lafauxpass
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -18,7 +31,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * Minimal scene-graph + keyframe system. Define elements, feed keyframes,
@@ -93,7 +105,6 @@ private sealed interface Node {
 private class CircleNode(
     override val name: String,
     override val kf: List<KF>,
-    private val pivotCenter: Boolean = true,
 ) : Node {
     override fun draw(scope: DrawScope, prog: KF) = with(scope) {
         val a = (prog.alpha ?: 1f).coerceIn(0f, 1f)
@@ -101,7 +112,7 @@ private class CircleNode(
         val px = (prog.x ?: 0.5f) * size.width
         val py = (prog.y ?: 0.5f) * size.height
         val w = (prog.w ?: 0.2f) * size.minDimension
-        val scale = (prog.sx ?: 1f + prog.sy ?: 1f) / 2f
+        val scale = ((prog.sx ?: 1f) + (prog.sy ?: 1f)) / 2f
         val radius = (w * scale) / 2f
         drawCircle(
             color = prog.color ?: Color.White,
@@ -131,7 +142,7 @@ private class RectNode(
                 color = prog.color ?: Color.White,
                 topLeft = Offset(cx, cy),
                 size = Size(w * (prog.sx ?: 1f), h * (prog.sy ?: 1f)),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(round, round),
+                cornerRadius = CornerRadius(round, round),
                 alpha = a
             )
         }
@@ -166,89 +177,41 @@ private class TriangleNode(
 private data class Scene(val durationMs: Long, val nodes: List<Node>)
 
 /**
- * Example scene:
- * - Pulsing background circle
- * - Sliding card
- * - Rotating accent triangle
- * - Title + subtitle fade/slide
+ * To tweak the animation, you can modify the values in the KF objects. t:
+ * timestamp in milliseconds w: width of the circle
  *
- * Replace these keyframes to match your video’s exact motion/tempo/colors.
+ * The animation is created by defining keyframes (KF objects) for each
+ * node. The system then interpolates between these keyframes to create a
+ * smooth animation.
  */
-private fun sampleScene(): Scene {
-    val bg = CircleNode(
-        name = "bgPulse",
+private fun rtaScene(): Scene {
+    val outerCircle = CircleNode(
+        name = "outerCircle",
         kf = listOf(
-            KF(0, x = .5f, y = .5f, w = 1.6f, alpha = 0f, color = Color(0xFF0E0F13)),
-            KF(200, x = .5f, y = .5f, w = 1.6f, alpha = 1f),
-            KF(1200, x = .5f, y = .5f, w = 1.8f, alpha = 1f),
-            KF(1600, x = .5f, y = .5f, w = 1.6f, alpha = 1f),
+            KF(0, w = 0.45f, color = Color(0xFFFBC02D)),
+            KF(1000, w = 0.5f),
+            KF(2000, w = 0.45f),
         )
     )
-    val card = RectNode(
-        name = "card",
-        round = 24f,
+    val innerCircle = CircleNode(
+        name = "innerCircle",
         kf = listOf(
-            KF(
-                0,
-                x = .5f,
-                y = 1.2f,
-                w = .86f,
-                h = .32f,
-                r = 0f,
-                alpha = 0f,
-                color = Color(0xFF161923)
-            ),
-            KF(350, x = .5f, y = .58f, w = .86f, h = .32f, r = 0f, alpha = 1f),
-            KF(900, x = .5f, y = .56f, w = .86f, h = .32f, r = 0f, alpha = 1f),
-            KF(1200, x = .5f, y = .58f, w = .86f, h = .32f, r = 0f, alpha = 1f),
+            KF(0, w = 0.4f, color = Color.White),
+            KF(1000, w = 0.42f),
+            KF(2000, w = 0.4f),
         )
     )
-    val accent = TriangleNode(
-        name = "accent",
-        kf = listOf(
-            KF(
-                200,
-                x = .82f,
-                y = .28f,
-                w = .10f,
-                h = .12f,
-                r = 0f,
-                alpha = 0f,
-                color = Color(0xFF4FC3F7)
-            ),
-            KF(450, x = .82f, y = .28f, w = .10f, h = .12f, r = 0f, alpha = 1f),
-            KF(1400, x = .82f, y = .28f, w = .10f, h = .12f, r = 360f, alpha = 1f),
-        )
-    )
-    val pill = RectNode(
-        name = "pill",
-        round = 999f,
-        kf = listOf(
-            KF(400, x = .5f, y = .42f, w = .46f, h = .06f, alpha = 0f, color = Color(0xFF263043)),
-            KF(700, x = .5f, y = .42f, w = .56f, h = .06f, alpha = 1f),
-            KF(1100, x = .5f, y = .42f, w = .50f, h = .06f, alpha = 1f),
-        )
-    )
-    val underline = RectNode(
-        name = "underline",
-        round = 12f,
-        kf = listOf(
-            KF(650, x = .5f, y = .68f, w = .00f, h = .008f, alpha = 0f, color = Color(0xFF4FC3F7)),
-            KF(900, x = .5f, y = .68f, w = .60f, h = .008f, alpha = 1f),
-            KF(1200, x = .5f, y = .68f, w = .52f, h = .008f, alpha = 1f),
-        )
-    )
+
     return Scene(
-        durationMs = 1800,
-        nodes = listOf(bg, card, accent, pill, underline)
+        durationMs = 2000,
+        nodes = listOf(outerCircle, innerCircle)
     )
 }
 
 @Composable
 fun ReconstructionScreen() {
-    val scene = remember { sampleScene() }
+    val scene = remember { rtaScene() }
     val playhead = remember { Animatable(0f) }
-    val scope = rememberCoroutineScope()
     var loopCount by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
@@ -277,47 +240,29 @@ fun ReconstructionScreen() {
                 node.draw(this, prog)
             }
         }
-
-        // Titles overlay (text is separate for crispness)
-        TitlesOverlay(playhead = playhead.value)
+        RtaLogoContent()
     }
 }
 
 @Composable
-private fun TitlesOverlay(playhead: Float) {
-    // Text keyframes (simple)
-    val tMs = (playhead * 1800).toLong()
-    val titleAlpha = when {
-        tMs < 420 -> 0f
-        tMs < 700 -> ((tMs - 420).toFloat() / 280f).coerceIn(0f, 1f)
-        else -> 1f
-    }
-    val subAlpha = when {
-        tMs < 650 -> 0f
-        tMs < 950 -> ((tMs - 650).toFloat() / 300f).coerceIn(0f, 1f)
-        else -> 1f
-    }
-    val slideY = if (tMs < 700) 12 else 0
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 88.dp)
+private fun RtaLogoContent() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        Spacer(modifier = Modifier.height((24 + slideY).dp))
-        Text(
-            "Your Title",
-            color = Color(0xFFE7ECF4).copy(alpha = titleAlpha),
-            fontSize = 28.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(Modifier.height(12.dp))
-        Text(
-            "Subtitle or Tagline",
-            color = Color(0xFFA9B4C7).copy(alpha = subAlpha),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "RTA",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = "Arrow",
+                tint = Color(0xFF6A1B9A),
+                modifier = Modifier.size(40.dp)
+            )
+        }
     }
 }

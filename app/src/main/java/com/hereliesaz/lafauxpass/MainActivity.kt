@@ -1,18 +1,6 @@
 package com.hereliesaz.lafauxpass
 
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
-import com.hereliesaz.lafauxpass.databinding.ActivityMainBinding
-
-import android.media.MediaPlayer
-import android.os.Bundle
 import android.os.CountDownTimer
 import android.widget.TextView
 import android.widget.VideoView
