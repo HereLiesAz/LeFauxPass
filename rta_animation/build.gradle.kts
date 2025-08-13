@@ -2,16 +2,19 @@
 plugins {
     id("com.android.application")
     kotlin("android")
+    kotlin("plugin.serialization") version "1.9.23"
 }
 
 android {
-    namespace = "com.hereliesaz.videorecon"
-    compileSdk = 35
+    // Use the correct namespace that matches your file structure
+    namespace = "com.hereliesaz.rta_animation"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.hereliesaz.videorecon"
+        // Use the correct application ID
+        applicationId = "com.hereliesaz.rta_animation"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         vectorDrawables { useSupportLibrary = true }
@@ -26,7 +29,9 @@ android {
         )
     }
 }
-
+kotlin {
+    jvmToolchain(17)
+}
 dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2025.01.00")
     implementation(composeBom)
@@ -39,4 +44,5 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.3.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
     debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 }
