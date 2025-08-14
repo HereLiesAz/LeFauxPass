@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "LA Faux Pass"
+rootProject.name = "LeFauxPass"
 include(":app")

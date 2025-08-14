@@ -25,7 +25,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun LAFauxPassTheme(
+fun LeFauxPassTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
