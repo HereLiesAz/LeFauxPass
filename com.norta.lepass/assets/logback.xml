@@ -1,0 +1,39 @@
+<!--
+  ~ COPYRIGHT - CUBIC TRANSPORTATION SYSTEMS, INC (“CUBIC”). ALL RIGHTS RESERVED.
+  ~
+  ~ Information Contained Herein is Proprietary and Confidential.
+  ~ The document is the property of “CUBIC” and may not be disclosed
+  ~ distributed, or reproduced  without the express written permission of
+  ~ “CUBIC”.
+  -->
+
+<configuration>
+    <property name="ANDROID_PACKAGE" value="${PACKAGE_NAME}" />
+    <property name="LOG_DIR" value="files/logs" />
+    <property name="APP_NAME" value="UMOAdKit" />
+    <property name="LOG_PATH" value="/data/data/${ANDROID_PACKAGE}/${LOG_DIR}" />
+
+    <file>/storage/emulated/0/data/data/mypackage/files/log/debug.log</file> -->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <!--<file>${EXT_FILES_DIR}/logs/umo_ad_kit.log</file>-->
+        <file>${LOG_PATH}/${APP_NAME}.log</file>
+        <encoder>
+            <pattern>[%date] [%level] [%thread] [%logger{10}] | [%file: %class{0}.%method:%L] %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE" class="ch.qos.logback.classic.android.LogcatAppender">
+        <tagEncoder>
+            <pattern>%logger{12}</pattern>
+        </tagEncoder>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--<pattern> [%thread] [%level] | [%class{0}.%method:%L] %m%n</pattern>-->
+            <pattern> [%level][%class{0}] %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="ALL">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

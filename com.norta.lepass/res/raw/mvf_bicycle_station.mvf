@@ -1,0 +1,48 @@
+{
+	"type": "container",
+	"stacking_strategy": "vertical",
+	"layers": [{
+		"type": "container",
+		"measureBackground": true,
+		"spacing": 3,
+		"background": {
+			"type": "image",
+			"id": "%3$s",
+			"color": "%1$s"
+		},
+		"layers": [{
+			"type": "container",
+			"ignoreIfEmpty": true,
+			"stacking_strategy": "horizontal",
+			"spacing": 3,
+			"layers": [{
+				"type": "image",
+				"color": "%2$s",
+				"id": "%4$s",
+				"layout": {
+					"x": 0.0,
+					"y": 0.5,
+					"halign": "left",
+					"valign": "center"
+				}
+			},
+			{
+				"type": "text",
+				"ignoreIfEmpty": true,
+				"color": "%2$s",
+				"text": "%5$s",
+				"size": 12,
+				"layout": {
+					"x": 0.0,
+					"y": 0.5,
+					"halign": "left",
+					"valign": "center"
+				}
+			}]
+		}]
+	},
+	{
+		"type": "image",
+		"id": "-1000014"
+	}]
+}

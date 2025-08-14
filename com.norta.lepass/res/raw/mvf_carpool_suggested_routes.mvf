@@ -1,0 +1,48 @@
+{
+	"type": "container",
+	"background": {
+		"type": "image",
+		"id": "-18"
+	},
+	"layout": {
+		"h": 25
+	},
+	"layers": [{
+		"type": "container",
+		"stacking_strategy": "horizontal",
+		"autoMirrored": true,
+		"spacing": 8,
+		"background": {
+			"type": "image",
+			"id": "-1000024",
+			"color": "%1$s"
+		},
+		"layout": {
+			"h": 25
+		},
+		"layers": [{
+			"type": "image",
+			"id": "%2$s",
+			"layout": {
+				"x": 0,
+				"y": 0.5,
+				"h": "16",
+				"halign": "left",
+				"valign": "center"
+			}
+		},
+		{
+			"type": "text",
+			"text": "%3$s",
+			"color": "%4$s",
+			"size": 14,
+			"bold": true,
+			"layout": {
+				"x": 0,
+				"y": 0.5,
+				"halign": "left",
+				"valign": "center"
+			}
+		}]
+	}]
+}

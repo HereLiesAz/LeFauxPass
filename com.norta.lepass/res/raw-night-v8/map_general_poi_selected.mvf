@@ -1,0 +1,27 @@
+{
+	"type": "container",
+	"layers":[
+	{
+		"type": "image",
+		"id": "%1$s",
+		"layout":{
+			"x": 0.5,
+			"y": 0.5,
+			"halign": "center",
+			"valign": "center"
+		}
+	},
+	{
+		"type": "image",
+		"id": "%2$s",
+		"color": "292A30",
+		"layout":{
+			"x": 0.5,
+			"y": 0.5,
+			"dy": -3,
+			"halign": "center",
+			"valign": "center"
+		}
+	}
+	]
+}

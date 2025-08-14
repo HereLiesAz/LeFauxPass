@@ -1,0 +1,53 @@
+{
+   "type": "container",
+   "layers": [
+        {
+            "type":"image",
+            "id":"-113"
+        },
+		{
+			"type":"image",
+			"id":"-114",
+			"color":"%1$s"
+		},
+		{
+			"type":"image",
+			"id":"-115",
+			"color":"%2$s"
+		},
+		{
+		   "type": "container",
+		   "ignoreIfEmpty":true,
+		   "measureBackground":true,
+		   "background":{
+		      "type": "container",
+              "layers": [
+              		{
+              			"type":"image",
+              			"id":"-116",
+              			"color":"%3$s"
+              		},
+              		{
+              			"type":"image",
+              			"id":"-117",
+              			"color":"%4$s"
+              		}
+              ]
+		   },
+           "layers": [
+				{
+					"type":"text",
+					"color":"%5$s",
+					"text": "%6$s",
+					"size":9,
+					"layout":{
+						"x": 0.76,
+						"y": 0.22,
+						"halign": "center",
+						"valign": "center"
+					}
+				}
+           ]
+		}
+    ]
+}

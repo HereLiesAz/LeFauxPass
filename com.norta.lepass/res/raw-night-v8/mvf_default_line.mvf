@@ -1,0 +1,39 @@
+{
+	"type": "container",
+	"background":{
+		"type": "image",
+		"id": "-18"
+	},
+	"layout":{
+		"h": 25
+	},
+	"layers":[
+		{
+			"type": "container",
+			"background":{
+				"type": "image",
+				"id": "-17",
+				"color": "%1$s",
+				"color_adjustment":"auto"
+			},
+			"layout":{
+                	"h": 25
+                },
+			"layers":[
+				{
+					"type": "text",
+					"text": "%2$s",
+					"color": "d0dadc",
+					"size": 15,
+					"bold": true,
+					"layout":{
+						"x": 0,
+						"y": 0.5,
+						"halign": "left",
+						"valign": "center"
+					}
+				}
+			]
+		}
+	]
+}
