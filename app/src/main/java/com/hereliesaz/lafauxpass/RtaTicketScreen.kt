@@ -15,31 +15,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import coil.compose.AsyncImage
 import com.hereliesaz.lefauxpass.ui.theme.LeFauxPassTheme
 import kotlinx.coroutines.delay
 import java.time.LocalTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RtaTicketScreen() {
+    val isInPreview = LocalInspectionMode.current
+    val context = LocalContext.current
+    var expirationTime by remember { mutableStateOf<ZonedDateTime?>(null) }
+
+    LaunchedEffect(Unit) {
+        if (isInPreview) {
+            expirationTime = ZonedDateTime.now().plusHours(1).plusMinutes(56)
+        } else {
+            var storedExpiration = ExpirationManager.getExpirationTime(context)
+            if (storedExpiration == null || storedExpiration.isBefore(ZonedDateTime.now())) {
+                storedExpiration = ZonedDateTime.now().plusHours(1).plusMinutes(56)
+                ExpirationManager.setExpirationTime(context, storedExpiration)
+            }
+            expirationTime = storedExpiration
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Column {
-                        Text("RTA", fontWeight = FontWeight.Bold)
-                        Text(
-                            "Show operator your ticket",
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        )
-                    }
-                },
+                title = { },
                 navigationIcon = {
                     IconButton(onClick = { /* Do nothing, it's a picture */ }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -47,81 +60,69 @@ fun RtaTicketScreen() {
                 },
                 actions = {
                     IconButton(onClick = { /* Also does nothing */ }) {
-                        Icon(Icons.Default.Info, contentDescription = "Information")
+                        Icon(Icons.Outlined.Info, contentDescription = "Information")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = DarkGray
                 )
             )
         },
         containerColor = MaterialTheme.colorScheme.surface
     ) { paddingValues ->
-        Column(
+        ConstraintLayout(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+                .padding(horizontal = 24.dp, vertical = 16.dp)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            RtaLogo()
-            LiveClock()
-            TicketInfoCard()
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
+            val (rtaText, rtaLogo, liveClock, ticketCard) = createRefs()
+            val topGuideline = createGuidelineFromTop(0.5f)
 
-@Composable
-fun RtaLogo() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .size(180.dp)
-            .clip(CircleShape)
-            .background(Color(0xFFFBC02D)) // A nice, respectable gold.
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxSize(0.9f)
-                .clip(CircleShape)
-                .background(Color.White)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    text = "RTA",
-                    fontSize = 36.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-                // The arrow, a monument to defiance against complex vector graphics.
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .width(14.dp)
-                            .height(20.dp)
-                            .background(Color(0xFF5E35B1)) // A regal purple.
-                    )
-                    Box(
-                        modifier = Modifier
-                            .width(14.dp)
-                            .height(20.dp)
-                            .background(Color(0xFFFBC02D))
-                    )
+            Text(
+                text = "RTA",
+                fontSize = 36.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier.constrainAs(rtaText) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
                 }
-            }
+            )
+
+            AsyncImage(
+                model = R.raw.animationwebp,
+                contentDescription = "Animation",
+                modifier = Modifier.constrainAs(rtaLogo) {
+                    top.linkTo(rtaText.bottom, margin = 16.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+            )
+
+            LiveClock(
+                modifier = Modifier.constrainAs(liveClock) {
+                    top.linkTo(rtaLogo.bottom, margin = 16.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+            )
+
+            TicketInfoCard(
+                expirationTime = expirationTime,
+                modifier = Modifier.constrainAs(ticketCard) {
+                    top.linkTo(topGuideline)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+            )
         }
     }
 }
 
 @Composable
-fun LiveClock() {
+fun LiveClock(modifier: Modifier = Modifier) {
     var currentTime by remember { mutableStateOf(LocalTime.now()) }
 
     LaunchedEffect(Unit) {
@@ -138,14 +139,22 @@ fun LiveClock() {
         fontSize = 64.sp,
         fontWeight = FontWeight.Light,
         textAlign = TextAlign.Center,
-        color = MaterialTheme.colorScheme.onSurface
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = modifier.fillMaxWidth(0.6f)
     )
 }
 
 @Composable
-fun TicketInfoCard() {
+fun TicketInfoCard(expirationTime: ZonedDateTime?, modifier: Modifier = Modifier) {
+    val formatter = remember { DateTimeFormatter.ofPattern("MMM dd, yyyy, h:mm a") }
+    val expirationText = if (expirationTime != null) {
+        "Expires ${expirationTime.format(formatter)}"
+    } else {
+        "Loading..."
+    }
+
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f)),
         color = MaterialTheme.colorScheme.surface,
@@ -168,7 +177,7 @@ fun TicketInfoCard() {
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Expires Jun 22, 2023, 1:03 PM",
+                text = expirationText,
                 color = Color.Gray,
                 fontSize = 14.sp
             )
