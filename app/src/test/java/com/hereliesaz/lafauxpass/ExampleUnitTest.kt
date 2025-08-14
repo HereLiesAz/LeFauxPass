@@ -1,4 +1,4 @@
-package com.hereliesaz.lafauxpass
+package com.hereliesaz.lefauxpass
 
 import org.junit.Test
 

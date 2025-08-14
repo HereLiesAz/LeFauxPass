@@ -1,4 +1,4 @@
-package com.hereliesaz.lafauxpass.ui.theme
+package com.hereliesaz.lefauxpass.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme

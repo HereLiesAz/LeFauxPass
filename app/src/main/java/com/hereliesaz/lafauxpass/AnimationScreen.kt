@@ -1,4 +1,4 @@
-package com.hereliesaz.lafauxpass
+package com.hereliesaz.lefauxpass
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
