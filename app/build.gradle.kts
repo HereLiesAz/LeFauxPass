@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.hereliesaz.lafauxpass"
-    compileSdk = 36
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.hereliesaz.lafauxpass"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
