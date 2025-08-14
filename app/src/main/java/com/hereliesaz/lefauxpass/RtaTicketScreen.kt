@@ -1,4 +1,4 @@
-package com.hereliesaz.lafauxpass
+package com.hereliesaz.lefauxpass
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
