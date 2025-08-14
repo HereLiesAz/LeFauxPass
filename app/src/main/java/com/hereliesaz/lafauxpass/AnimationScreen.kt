@@ -1,21 +1,31 @@
-package com.hereliesaz.lefauxpass
+package com.hereliesaz.lafauxpass // Corrected package name
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -28,9 +38,13 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Minimal scene-graph + keyframe system. Define elements, feed keyframes,
@@ -149,6 +163,14 @@ private class RectNode(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    MaterialTheme {
+        ReconstructionScreen()
+    }
+}
+
 private class TriangleNode(
     override val name: String,
     override val kf: List<KF>,
@@ -213,36 +235,89 @@ fun ReconstructionScreen() {
     val scene = remember { rtaScene() }
     val playhead = remember { Animatable(0f) }
     var loopCount by remember { mutableIntStateOf(0) }
+    var currentTime by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        // tiny lead-in
-        delay(50)
         while (true) {
-            playhead.snapTo(0f)
-            playhead.animateTo(
-                1f,
-                animationSpec = tween(durationMillis = scene.durationMs.toInt())
-            )
-            loopCount++
+            val sdf = SimpleDateFormat("h:mm:ss a", Locale.US)
+            currentTime = sdf.format(Date())
+            delay(1000)
         }
     }
 
-    Box(Modifier.fillMaxSize()) {
-        Canvas(
+    LaunchedEffect(loopCount) {
+        playhead.snapTo(0f)
+        playhead.animateTo(
+            1f,
+            animationSpec = tween(durationMillis = scene.durationMs.toInt())
+        )
+        loopCount++
+    }
+
+    Surface(color = Color.White, modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(0.dp)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
-            val t = (playhead.value * scene.durationMs).toLong()
-            // draw order = z-order
-            scene.nodes.forEach { node ->
-                val prog = node.kf.sample(t)
-                node.draw(this, prog)
+            Spacer(modifier = Modifier.height(64.dp))
+
+            Box(
+                modifier = Modifier.size(150.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Canvas(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    val t = (playhead.value * scene.durationMs).toLong()
+                    scene.nodes.forEach { node ->
+                        val prog = node.kf.sample(t)
+                        node.draw(this, prog)
+                    }
+                }
+                RtaLogoContent()
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = currentTime,
+                fontSize = 48.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Adult Single Ride, Bus & Streetcar",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "New Orleans, LA",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Expires Jun 22, 2023, 1:03 PM",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
-        RtaLogoContent()
     }
 }
+
 
 @Composable
 private fun RtaLogoContent() {
