@@ -43,4 +43,7 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+    <string name="adult_single_ride_bus_amp_streetcar"><![CDATA[Adult Single Ride, Bus & Streetcar]]></string>
+    <string name="new_orleans_la">New Orleans, LA</string>
+    <string name="expires_jun_22_2023_1_03_pm">Expires Jun 22, 2023, 1:03 PM</string>
 </resources>

@@ -52,7 +52,7 @@
                 android:id="@+id/ticketTypeTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Adult Single Ride, Bus &amp; Streetcar"
+                android:text="@string/adult_single_ride_bus_amp_streetcar"
                 android:textAppearance="?attr/textAppearanceHeadline6"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -62,7 +62,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="New Orleans, LA"
+                android:text="@string/new_orleans_la"
                 android:textAppearance="?attr/textAppearanceBody2"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/ticketTypeTextView" />
@@ -72,7 +72,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Expires Jun 22, 2023, 1:03 PM"
+                android:text="@string/expires_jun_22_2023_1_03_pm"
                 android:textAppearance="?attr/textAppearanceBody2"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/locationTextView" />
