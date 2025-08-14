@@ -1,60 +1,51 @@
-package com.hereliesaz.lefauxpass
+package com.hereliesaz.lafauxpass
 
 import android.os.Bundle
-import android.os.CountDownTimer
-import android.widget.TextView
-import android.widget.VideoView
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import java.text.SimpleDateFormat
-import java.util.*
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
+import com.hereliesaz.lafauxpass.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var timeTextView: TextView
-    private lateinit var expirationTextView: TextView
-    private lateinit var videoView: VideoView
-    private var expirationTime: Long = 0
+    private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        timeTextView = findViewById(R.id.timeTextView)
-        expirationTextView = findViewById(R.id.expirationTextView)
-        videoView = findViewById(R.id.videoView)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Replace "your_video_path" with the actual path to your video
-        videoView.setVideoPath("app/src/main/res/raw/rtalogo.mp4")
-        videoView.start()
-        videoView.setOnCompletionListener {
-            videoView.start()
-        }
+        setSupportActionBar(binding.toolbar)
 
-        val currentTime = System.currentTimeMillis()
-        expirationTime = currentTime + (3600 + 57 * 60 + 13) * 1000
-        updateTimer()
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        appBarConfiguration = AppBarConfiguration(navController.graph)
+        setupActionBarWithNavController(navController, appBarConfiguration)
 
-        object : CountDownTimer(expirationTime - currentTime, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                updateTimer()
-            }
-
-            override fun onFinish() {
-                // Handle expiration here (e.g., show a message)
-            }
-        }.start()
+        supportActionBar?.title = "RTA"
+        supportActionBar?.subtitle = "Show operator your ticket"
     }
 
-    private fun updateTimer() {
-        val currentTime = System.currentTimeMillis()
-        val remainingTime = expirationTime - currentTime
-        val hours = remainingTime / (1000 * 60 * 60)
-        val minutes = (remainingTime % (1000 * 60 * 60)) / (1000 * 60)
-        val seconds = (remainingTime % (1000 * 60)) / 1000
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
 
-        timeTextView.text = SimpleDateFormat("HH:mm:ss").format(Date())
-        expirationTextView.text = "Expires in: $hours hours, $minutes minutes, $seconds seconds"
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_info -> true
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        return navController.navigateUp(appBarConfiguration)
+                || super.onSupportNavigateUp()
     }
 }
-
-
