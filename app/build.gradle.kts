@@ -59,6 +59,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.coil.compose)
     // Added for more icons
     implementation(libs.material.icons.extended)
     testImplementation(libs.junit)
