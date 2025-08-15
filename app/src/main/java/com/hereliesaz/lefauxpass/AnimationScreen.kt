@@ -89,7 +89,7 @@ private fun interp(prev: KF, next: KF, t: Long): KF {
         sy = v { it.sy } ?: 1f,
         alpha = v { it.alpha } ?: 1f,
         color = if (prev.color != null && next.color != null)
-            prev.color!!.lerp(next.color!!, f) else next.color ?: prev.color
+            prev.color.lerp(next.color, f) else next.color ?: prev.color
     )
 }
 
