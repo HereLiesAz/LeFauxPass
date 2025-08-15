@@ -9,7 +9,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import com.hereliesaz.lafauxpass.databinding.ActivityMainBinding
+import com.hereliesaz.lefauxpass.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
