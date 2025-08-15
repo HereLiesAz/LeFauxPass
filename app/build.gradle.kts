@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
-    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -36,6 +35,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+        freeCompilerArgs += "-Xskip-metadata-version-check"
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
     buildFeatures {
         compose = true
