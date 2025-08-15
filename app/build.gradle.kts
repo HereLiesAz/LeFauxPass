@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.hereliesaz.lafauxpass"
+    namespace = "com.hereliesaz.lefauxpass"
     compileSdk = 36
 
     defaultConfig {

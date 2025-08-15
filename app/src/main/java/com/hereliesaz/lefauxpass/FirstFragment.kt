@@ -1,4 +1,4 @@
-package com.hereliesaz.lafauxpass
+package com.hereliesaz.lefauxpass
 
 import android.os.Bundle
 import android.view.LayoutInflater

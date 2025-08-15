@@ -1,4 +1,4 @@
-package com.hereliesaz.lafauxpass // Corrected package name
+package com.hereliesaz.lefauxpass // Corrected package name
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
