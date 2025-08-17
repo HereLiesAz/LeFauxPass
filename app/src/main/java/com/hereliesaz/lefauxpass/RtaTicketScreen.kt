@@ -9,6 +9,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
+import com.hereliesaz.lefauxpass.R
+import com.hereliesaz.lefauxpass.ui.theme.DarkGray
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,7 +62,7 @@ fun RtaTicketScreen() {
                 },
                 actions = {
                     IconButton(onClick = { /* Also does nothing */ }) {
-                        Icon(Icons.Outlined.Info, contentDescription = "Information")
+                        Icon(Icons.Filled.Info, contentDescription = "Information")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
