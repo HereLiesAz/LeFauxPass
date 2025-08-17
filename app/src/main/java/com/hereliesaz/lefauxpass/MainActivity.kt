@@ -1,6 +1,5 @@
 package com.hereliesaz.lefauxpass
 
-import android.R
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -45,8 +44,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
+        throw RuntimeException("App crashed as requested")
     }
 }
