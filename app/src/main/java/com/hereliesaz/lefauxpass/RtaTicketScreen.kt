@@ -93,8 +93,10 @@ fun RtaTicketScreen() {
                 }
             )
 
+            val imageLoader = createImageLoader(context)
             AsyncImage(
                 model = R.raw.animationwebp,
+                imageLoader = imageLoader,
                 contentDescription = "Animation",
                 modifier = Modifier.constrainAs(rtaLogo) {
                     top.linkTo(rtaText.bottom, margin = 16.dp)
