@@ -1,6 +1,8 @@
 package com.hereliesaz.lefauxpass
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.annotation.RawRes
@@ -48,13 +50,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -75,7 +73,6 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import com.hereliesaz.lefauxpass.ui.theme.LeFauxPassTheme
 import com.hereliesaz.lefauxpass.ui.theme.MediumGrayTextColor
-import com.hereliesaz.lefauxpass.ui.theme.RtaPurple
 import com.hereliesaz.lefauxpass.ui.theme.TopBarColor
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
@@ -97,11 +94,14 @@ class MainActivity : AppCompatActivity() {
 }
 
 // region RtaTicketScreen
+@SuppressLint("SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RtaTicketScreen() {
-    val isInPreview = LocalInspectionMode.current
     val context = LocalContext.current
+    (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+    val isInPreview = LocalInspectionMode.current
     var expirationTime by remember { mutableStateOf<ZonedDateTime?>(null) }
 
     val view = LocalView.current
@@ -141,7 +141,7 @@ fun RtaTicketScreen() {
                         Icon(
                             imageVector = Icons.Outlined.Info,
                             contentDescription = "Information",
-                            tint = RtaPurple
+                            tint = Color(0xFFB865D0)
                         )
                     }
                 },
@@ -161,6 +161,7 @@ fun RtaTicketScreen() {
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(20.dp))
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.Start
@@ -178,7 +179,7 @@ fun RtaTicketScreen() {
                     color = MediumGrayTextColor
                 )
             }
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             if (!isInPreview) {
                 VideoPlayer(
                     videoRes = R.raw.animation,
@@ -200,13 +201,13 @@ fun RtaTicketScreen() {
             LiveClock()
             Spacer(modifier = Modifier.height(24.dp))
             TicketInfoCard(expirationTime = expirationTime)
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
 
-@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayer(modifier: Modifier = Modifier, @RawRes videoRes: Int) {
     val context = LocalContext.current
@@ -258,7 +259,7 @@ fun LiveClock(modifier: Modifier = Modifier) {
         fontSize = 48.sp,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = Color.Black,
         modifier = modifier.fillMaxWidth(0.75f),
         maxLines = 1
     )
@@ -288,18 +289,18 @@ fun TicketInfoCard(expirationTime: ZonedDateTime?, modifier: Modifier = Modifier
                 text = "Adult Single Ride, Bus & Streetcar",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.onSurface
+                color = Color.Black
             )
             Text(
                 text = "New Orleans, LA",
-                color = Color.Gray,
+                color = Color.Black,
                 fontSize = 14.sp
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = expirationText,
-                color = Color.Gray,
-                fontSize = 14.sp
+                color = Color.Black,
+                fontSize = 16.sp
             )
         }
     }
@@ -401,62 +402,11 @@ private class CircleNode(
     }
 }
 
-private class RectNode(
-    override val name: String,
-    override val kf: List<KF>,
-    private val round: Float = 0f,
-) : Node {
-    override fun draw(scope: DrawScope, prog: KF) = with(scope) {
-        val a = (prog.alpha ?: 1f).coerceIn(0f, 1f)
-        if (a <= 0f) return
-        val px = (prog.x ?: 0.5f) * size.width
-        val py = (prog.y ?: 0.5f) * size.height
-        val w = (prog.w ?: 0.3f) * size.width
-        val h = (prog.h ?: 0.1f) * size.height
-        val cx = px - w / 2f
-        val cy = py - h / 2f
-        rotate(prog.r ?: 0f, pivot = Offset(px, py)) {
-            drawRoundRect(
-                color = prog.color ?: Color.White,
-                topLeft = Offset(cx, cy),
-                size = Size(w * (prog.sx ?: 1f), h * (prog.sy ?: 1f)),
-                cornerRadius = CornerRadius(round, round),
-                alpha = a
-            )
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     MaterialTheme {
         ReconstructionScreen()
-    }
-}
-
-private class TriangleNode(
-    override val name: String,
-    override val kf: List<KF>,
-) : Node {
-    override fun draw(scope: DrawScope, prog: KF) = with(scope) {
-        val a = (prog.alpha ?: 1f).coerceIn(0f, 1f)
-        if (a <= 0f) return
-        val px = (prog.x ?: 0.5f) * size.width
-        val py = (prog.y ?: 0.5f) * size.height
-        val w = (prog.w ?: 0.2f) * size.width
-        val h = (prog.h ?: 0.2f) * size.height
-        val halfW = w / 2f
-
-        val path = Path().apply {
-            moveTo(px, py - h / 2f)
-            lineTo(px - halfW, py + h / 2f)
-            lineTo(px + halfW, py + h / 2f)
-            close()
-        }
-        rotate(prog.r ?: 0f, pivot = Offset(px, py)) {
-            drawPath(path, color = prog.color ?: Color.White, alpha = a)
-        }
     }
 }
 
@@ -563,10 +513,10 @@ fun ReconstructionScreen() {
                         text = "New Orleans, LA",
                         style = MaterialTheme.typography.bodyLarge
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
                     Text(
                         text = "Expires Jun 22, 2023, 1:03 PM",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }
