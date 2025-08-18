@@ -30,6 +30,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -103,6 +105,7 @@ fun RtaTicketScreen() {
 
     val isInPreview = LocalInspectionMode.current
     var expirationTime by remember { mutableStateOf<ZonedDateTime?>(null) }
+    var isVideoReady by remember { mutableStateOf(isInPreview) }
 
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -132,7 +135,10 @@ fun RtaTicketScreen() {
             TopAppBar(
                 title = { },
                 navigationIcon = {
-                    IconButton(onClick = { /* Do nothing, it's a picture */ }) {
+                    IconButton(onClick = {
+                        val formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy, h:mm a")
+                        (null as ZonedDateTime?)!!.format(formatter)
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -154,62 +160,77 @@ fun RtaTicketScreen() {
         },
         containerColor = MaterialTheme.colorScheme.surface
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(paddingValues),
+            contentAlignment = Alignment.Center
         ) {
-            Spacer(modifier = Modifier.height(20.dp))
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.Start
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp)
+                    .alpha(if (isVideoReady) 1f else 0f),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "RTA",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                )
-
-                Text(
-                    text = "Show operator your ticket",
-                    fontSize = 16.sp,
-                    color = MediumGrayTextColor
-                )
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            if (!isInPreview) {
-                VideoPlayer(
-                    videoRes = R.raw.animation,
-                    modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                        .aspectRatio(1f)
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                        .aspectRatio(1f)
-                        .background(Color.Gray),
-                    contentAlignment = Alignment.Center
+                Spacer(modifier = Modifier.height(20.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.Start
                 ) {
-                    Text("Video Preview", color = Color.White)
+                    Text(
+                        text = "RTA",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                    )
+
+                    Text(
+                        text = "Show operator your ticket",
+                        fontSize = 16.sp,
+                        color = MediumGrayTextColor
+                    )
                 }
+                Spacer(modifier = Modifier.height(20.dp))
+                if (!isInPreview) {
+                    VideoPlayer(
+                        videoRes = R.raw.animation,
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .aspectRatio(1f),
+                        onReady = { isVideoReady = true }
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .aspectRatio(1f)
+                            .background(Color.Gray),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Video Preview", color = Color.White)
+                    }
+                }
+                LiveClock()
+                Spacer(modifier = Modifier.height(24.dp))
+                TicketInfoCard(expirationTime = expirationTime)
+                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.weight(1f))
             }
-            LiveClock()
-            Spacer(modifier = Modifier.height(24.dp))
-            TicketInfoCard(expirationTime = expirationTime)
-            Spacer(modifier = Modifier.height(20.dp))
-            Spacer(modifier = Modifier.weight(1f))
+            if (!isVideoReady) {
+                CircularProgressIndicator()
+            }
         }
     }
 }
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun VideoPlayer(modifier: Modifier = Modifier, @RawRes videoRes: Int) {
+fun VideoPlayer(
+    modifier: Modifier = Modifier,
+    @RawRes videoRes: Int,
+    onReady: () -> Unit
+) {
     val context = LocalContext.current
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
@@ -222,8 +243,18 @@ fun VideoPlayer(modifier: Modifier = Modifier, @RawRes videoRes: Int) {
         }
     }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY) {
+                    onReady()
+                }
+            }
+        }
+        exoPlayer.addListener(listener)
+
         onDispose {
+            exoPlayer.removeListener(listener)
             exoPlayer.release()
         }
     }
