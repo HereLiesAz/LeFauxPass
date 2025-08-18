@@ -42,8 +42,6 @@ android {
     }
     buildFeatures {
         compose = true
-        dataBinding = true
-        viewBinding = true
     }
     packaging {
         resources {
@@ -75,7 +73,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.material)
-    implementation(libs.navigation.fragment.ktx)
-    implementation(libs.navigation.ui.ktx)
 
 }
