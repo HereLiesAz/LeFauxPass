@@ -63,6 +63,8 @@ dependencies {
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
     // Added for more icons
     implementation(libs.material.icons.extended)
     testImplementation(libs.junit)
