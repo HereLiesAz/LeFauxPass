@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>RTA Ticket</title>
+    <link rel="stylesheet" href="{{ "/assets/css/main.css" | relative_url }}">
+    <link rel="manifest" href="{{ "/manifest.json" | relative_url }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    {{ content }}
+
+    <div id="pwa-install-prompt" style="display: none;">
+        <p>To use this app in full screen, please add it to your home screen.</p>
+        <button id="pwa-install-close">Close</button>
+    </div>
+
+    <div class="ticket-screen">
+        <header class="top-bar">
+            <div class="nav-icon back-button">
+                <!-- Back button icon (e.g., SVG or font icon) -->
+                &#x2190;
+            </div>
+            <div class="title"></div>
+            <div class="nav-icon info-button">
+                <!-- Info icon (e.g., SVG or font icon) -->
+                &#x24D8;
+            </div>
+        </header>
+
+        <main class="ticket-content">
+            <div class="ticket-header">
+                <h1>RTA</h1>
+                <p>Show operator your ticket</p>
+            </div>
+
+            <div class="animation-container">
+                <img src="{{ "/assets/animation.webp" | relative_url }}" alt="Live ticket animation">
+            </div>
+
+            <div id="live-clock" class="live-clock">
+                <!-- Live clock will be inserted here by JavaScript -->
+            </div>
+
+            <div class="ticket-info-card">
+                <p class="ticket-type">Adult Single Ride, Bus & Streetcar</p>
+                <p class="location">New Orleans, LA</p>
+                <p id="expiration-time" class="expiration">
+                    <!-- Expiration time will be inserted here by JavaScript -->
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ "/assets/js/main.js" | relative_url }}"></script>
+</body>
+</html>
