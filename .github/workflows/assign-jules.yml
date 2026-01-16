@@ -1,0 +1,29 @@
+name: Jules Issue Handler
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  jules-process-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Invoke Jules
+        uses: google-labs-code/jules-invoke@v1
+        with:
+          jules_api_key: ${{ secrets.JULES_API_KEY }}
+          prompt: |
+            You are Jules, a skilled software engineer.
+            You have been assigned to handle the following issue:
+
+            Title: ${{ github.event.issue.title }}
+            Body:
+            ${{ github.event.issue.body }}
+
+            Please analyze the issue, plan a solution, and implement the necessary changes to the codebase.
+            Ensure you address the problem described in the issue.
+
+            IMPORTANT: Once you have completed the task and verified your changes, you MUST close the issue #${{ github.event.issue.number }}.
