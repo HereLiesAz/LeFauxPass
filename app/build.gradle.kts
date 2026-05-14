@@ -13,8 +13,8 @@ val versionProps = Properties().apply {
 }
 
 // Load local properties
+val localPropertiesFile = project.rootProject.file("local.properties")
 val localProperties = Properties().apply {
-    val localPropertiesFile = project.rootProject.file("local.properties")
     if (localPropertiesFile.exists()) {
         localPropertiesFile.inputStream().use { load(it) }
     }
@@ -44,8 +44,8 @@ android {
         applicationId = "com.hereliesaz.lefauxpass"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = currentVersionCode
+        versionName = currentVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
