@@ -54,6 +54,8 @@ jobs:
           api_location: ${{ env.API_LOCATION }}
           app_artifact_location: ${{ env.APP_ARTIFACT_LOCATION }}
           ###### End of Repository/Build Configurations ######
+        env:
+          skip_deploy_on_missing_secrets: true
 
   close_pull_request_job:
     permissions:
@@ -68,3 +70,5 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ env.AZURE_STATIC_WEB_APPS_API_TOKEN }} # secret containing api token for app
           action: "close"
+        env:
+          skip_deploy_on_missing_secrets: true
