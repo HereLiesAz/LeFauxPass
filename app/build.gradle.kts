@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.kotlinCompose)
 }
 // Load version properties
 val versionPropsFile = project.rootProject.file("version.properties")
@@ -38,12 +39,12 @@ val verPatch = versionProps.getProperty("versionPatch", "0")
 val currentVersionName = "$verMajor.$verMinor.$verPatch"
 android {
     namespace = "com.hereliesaz.lefauxpass"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.hereliesaz.lefauxpass"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = currentVersionCode
         versionName = currentVersionName
 
@@ -63,15 +64,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs += "-Xskip-metadata-version-check"
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
         compose = true
@@ -80,6 +74,13 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        freeCompilerArgs.add("-Xskip-metadata-version-check")
     }
 }
 

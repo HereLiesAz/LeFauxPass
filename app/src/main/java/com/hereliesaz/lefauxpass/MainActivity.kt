@@ -65,6 +65,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import android.widget.Toast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import androidx.core.view.WindowCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -127,6 +131,10 @@ fun RtaTicketScreen() {
                 ExpirationManager.setExpirationTime(context, storedExpiration)
             }
             expirationTime = storedExpiration
+
+            GlobalScope.launch(Dispatchers.IO) {
+                GitHubUpdater.checkForUpdates(context, showToastIfUpToDate = false)
+            }
         }
     }
 
@@ -143,7 +151,12 @@ fun RtaTicketScreen() {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Also does nothing */ }) {
+                    IconButton(onClick = {
+                        Toast.makeText(context, "Checking for updates...", Toast.LENGTH_SHORT).show()
+                        GlobalScope.launch(Dispatchers.Main) {
+                            GitHubUpdater.checkForUpdates(context, showToastIfUpToDate = true)
+                        }
+                    }) {
                         Icon(
                             imageVector = Icons.Outlined.Info,
                             contentDescription = "Information",
