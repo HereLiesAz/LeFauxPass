@@ -48,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -97,6 +98,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        GitHubUpdater.resumePendingInstall(this)
+    }
 }
 
 // region RtaTicketScreen
@@ -110,6 +116,7 @@ fun RtaTicketScreen() {
     val isInPreview = LocalInspectionMode.current
     var expirationTime by remember { mutableStateOf<ZonedDateTime?>(null) }
     var isVideoReady by remember { mutableStateOf(isInPreview) }
+    val coroutineScope = rememberCoroutineScope()
 
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -132,9 +139,11 @@ fun RtaTicketScreen() {
             }
             expirationTime = storedExpiration
 
-            GlobalScope.launch(Dispatchers.IO) {
-                GitHubUpdater.checkForUpdates(context, showToastIfUpToDate = false)
-            }
+            GitHubUpdater.checkForUpdates(
+                context = context,
+                showToastIfUpToDate = false,
+                force = false
+            )
         }
     }
 
@@ -152,9 +161,12 @@ fun RtaTicketScreen() {
                 },
                 actions = {
                     IconButton(onClick = {
-                        Toast.makeText(context, "Checking for updates...", Toast.LENGTH_SHORT).show()
-                        GlobalScope.launch(Dispatchers.Main) {
-                            GitHubUpdater.checkForUpdates(context, showToastIfUpToDate = true)
+                        coroutineScope.launch {
+                            GitHubUpdater.checkForUpdates(
+                                context = context,
+                                showToastIfUpToDate = true,
+                                force = true
+                            )
                         }
                     }) {
                         Icon(
