@@ -288,8 +288,20 @@ fun VideoPlayer(
         factory = {
             PlayerView(it).apply {
                 player = exoPlayer
-                useController = false // Hide controls
+                useController = false
                 resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+
+                // The source video has a thin dark seam on its extreme
+                // left/right pixels. Slightly overscan the video surface
+                // inside the fixed player bounds so those pixels are cropped.
+                clipChildren = true
+                clipToPadding = true
+                setBackgroundColor(android.graphics.Color.WHITE)
+                setShutterBackgroundColor(android.graphics.Color.WHITE)
+
+                videoSurfaceView?.apply {
+                    scaleX = 1.02f
+                }
             }
         },
         modifier = modifier
