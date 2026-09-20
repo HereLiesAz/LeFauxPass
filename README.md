@@ -33,14 +33,25 @@ The expiration timestamp is stored locally in `SharedPreferences` by `Expiration
 
 ## Updates
 
-`GitHubUpdater` checks the public GitHub **latest release** endpoint, downloads the first APK asset it finds to app cache, and opens Android's package installer through a `FileProvider`.
+`GitHubUpdater` is a version-aware self-updater backed by GitHub Releases. It automatically checks at app launch (throttled to once every six hours) and can be forced manually from the top-right action.
+
+The updater:
+
+- reads the GitHub Releases API, including prereleases;
+- selects the newest eligible APK asset;
+- compares CI build numbers against the installed Android `versionCode`;
+- verifies GitHub's SHA-256 asset digest when provided;
+- verifies the downloaded APK package name and signing certificate;
+- rejects same-version/downgrade APKs;
+- downloads to app cache and hands the verified APK to Android's package installer;
+- resumes installation after the user grants "Install unknown apps" permission when required.
+
+Android still requires the user to approve the system package-installer prompt; LeFauxPass does not attempt privileged or silent installation.
 
 The app therefore declares:
 
 - `android.permission.INTERNET`
 - `android.permission.REQUEST_INSTALL_PACKAGES`
-
-Note that GitHub's `releases/latest` endpoint refers to the latest non-prerelease release. The CI workflow also publishes rolling prerelease builds, so the in-app updater and the prerelease channel are not necessarily the same release.
 
 ## Build
 
@@ -50,7 +61,7 @@ From the repository root:
 ./gradlew assembleDebug
 ```
 
-The Gradle daemon is pinned to JDK 17 in `gradle/gradle-daemon-jvm.properties`. The Android source is configured for Java/Kotlin JVM target 21.
+The Gradle daemon and CI are pinned to Temurin/JDK 21, matching the app's Java/Kotlin JVM target 21.
 
 Dependency versions are centralized in:
 
@@ -64,11 +75,12 @@ gradle/libs.versions.toml
 
 Current workflow behavior:
 
-- pushes: all branches
-- pull requests: `main`
-- repository default branch: `master`
+- pushes: all branches are built;
+- pull requests targeting `master` are built;
+- rolling GitHub prereleases are published only from successful pushes to `master`;
+- each rolling release keeps only the current APK asset plus optional build tools.
 
-That branch-name mismatch is intentional documentation of the current workflow state, not a claim that PR builds against `master` are enabled.
+CI passes the repository commit count as Android `versionCode`, and the APK `versionName` is `major.minor.patch.build`. This gives the updater a monotonic version to compare.
 
 ## Repository map
 

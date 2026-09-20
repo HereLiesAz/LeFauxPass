@@ -30,13 +30,9 @@ It is referenced as `R.raw.animation` and played through Media3 / ExoPlayer. Rep
 
 `ExpirationManager.kt` persists the expiration timestamp locally in `SharedPreferences`.
 
-`GitHubUpdater.kt` checks:
+`GitHubUpdater.kt` checks the GitHub Releases collection, including prereleases. Automatic checks are throttled to six hours; manual checks bypass the throttle. It selects the newest eligible APK, verifies GitHub's SHA-256 digest when available, validates package ID and signer, rejects non-upgrades, and then launches Android's package installer through `FileProvider`.
 
-```
-https://api.github.com/repos/hereliesaz/LeFauxPass/releases/latest
-```
-
-It downloads an APK into app cache and launches Android's package installer via `FileProvider`.
+The updater may direct the user to Android's "Install unknown apps" settings when permission is not yet granted, then resumes the pending install when the activity returns.
 
 ## Build
 
@@ -52,7 +48,7 @@ Useful verification:
 ./gradlew testDebugUnitTest assembleDebug
 ```
 
-The Gradle daemon is pinned to JDK 17 by `gradle/gradle-daemon-jvm.properties`. Android compile options and the Kotlin JVM target are 21.
+The Gradle daemon and CI use JDK 21. Android compile options and the Kotlin JVM target are also 21.
 
 Do not regenerate a vendor-specific daemon toolchain file unless required. A previous JetBrains JDK 21 auto-provisioning configuration caused CI failures because the provisioned toolchain did not satisfy Gradle's required JDK executables.
 
@@ -63,14 +59,12 @@ Do not regenerate a vendor-specific daemon toolchain file unless required. A pre
 1. checks out the repository,
 2. injects optional service configuration,
 3. generates the signing keystore from repository secrets,
-4. sets up Temurin JDK 17,
-5. runs `assembleDebug`,
+4. sets up Temurin JDK 21,
+5. runs `assembleDebug` with the commit count supplied as `versionBuild`,
 6. creates a GitHub issue on build failure,
-7. publishes/updates a rolling prerelease on successful pushes.
+7. publishes/updates the rolling prerelease only for successful pushes to `master`.
 
-The repository default branch is `master`, while the workflow's `pull_request` filter currently names `main`. Do not assume PR CI runs for `master` until that workflow is changed.
-
-The in-app updater uses GitHub's `releases/latest` endpoint, which normally resolves the latest non-prerelease release. The rolling CI release is a prerelease. Treat those as separate channels unless the updater or release policy is changed.
+Pull requests targeting `master` are built but do not publish releases. The rolling release deletes stale APK assets before uploading the new one. The in-app updater intentionally consumes prereleases, so this rolling release is the active update channel.
 
 ## Versioning
 
@@ -83,7 +77,7 @@ versionPatch=0
 versionBuild=6
 ```
 
-The Android Gradle configuration derives `versionName` from major/minor/patch. CI also derives release asset names from repository history and build count.
+The Android Gradle configuration uses CI's `versionBuild` as `versionCode` and produces `versionName` as `major.minor.patch.build`. CI uses the same four-part version in APK asset names.
 
 ## Change discipline
 
