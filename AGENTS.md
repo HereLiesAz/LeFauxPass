@@ -1,73 +1,109 @@
-# Geministrator Agent Guide
+# LeFauxPass Agent Guide
 
-This document provides guidance for AI agents working on the Geministrator project.
+This file is the working guide for automated coding agents operating on **HereLiesAz/LeFauxPass**. Ignore older assumptions about unrelated projects; this repository is LeFauxPass.
 
-## Project Overview
+## Source of truth
 
-Geministrator is an AI-powered development assistant built on a team of collaborative agents. It can
-deconstruct high-level tasks into a detailed, multi-step execution plan and then execute that plan.
+The canonical implementation is the native Android project at the repository root:
 
-## Architecture
+- module: `:app`
+- package / application ID: `com.hereliesaz.lefauxpass`
+- UI: Kotlin + Jetpack Compose
+- default branch: `master`
+- min SDK: 26
+- compile / target SDK: 37
+- dependency catalog: `gradle/libs.versions.toml`
 
-The project is a multi-module Gradle project with the following structure:
+`LeFauxPassRN/` and `rta-ticket-clone/` are alternate/historical implementations. Do not modify them as a substitute for changing the native Android app unless the task explicitly names them.
 
-- `:cli`: The core logic of the application, including the `Orchestrator` and the council of agents.
-  It is used as a library by the other modules.
-- `:app_android`: The Android app front-end.
-- `:plugin_android_studio`: The Android Studio plugin front-end.
-- `:plugin_vscode`: The VSCode extension front-end.
-- `:prompts`: Contains the JSON files that define the behavior of the AI agents.
+## Current native behavior
 
-### The Council of Agents
+`MainActivity.kt` renders the ticket screen, live clock, expiration information, and the looping animation.
 
-Geministrator operates not as a single monolithic AI, but as a team of specialists with distinct
-roles, managed by a central `Orchestrator`.
+The production animation asset is:
 
-- **Orchestrator**: Manages the master plan and deploys agents based on a triage assessment.
-- **Manager**: Executes the step-by-step workflow for a single task.
-- **Architect**: Analyzes existing code to provide context.
-- **Researcher**: Scours the web for best practices and documentation.
-- **Designer**: Creates specifications and updates changelogs.
-- **Antagonist**: Critiques plans to find flaws before execution.
-- **Tech Support**: Analyzes merge conflicts and other technical failures.
-
-### `AbstractCommand` and `ExecutionAdapter`
-
-The system uses a set of universal commands called `AbstractCommand`s, defined in
-`cli/src/main/kotlin/com/hereliesaz/geministrator/common/AbstractCommand.kt`. These commands are the
-only way the agents can interact with the environment (file system, Git, etc.).
-
-Each front-end (CLI, Android, plugins) has its own implementation of the `ExecutionAdapter`
-interface, which is responsible for executing the `AbstractCommand`s in that specific environment.
-
-## Development Conventions
-
-### Adding New Features
-
-To add a new feature, you will likely need to:
-
-1. Add a new `AbstractCommand` to `AbstractCommand.kt`.
-2. Implement the execution of the new command in the relevant `ExecutionAdapter`s (`CliAdapter`,
-   `AndroidExecutionAdapter`, `AndroidStudioAdapter`).
-3. Modify the `Orchestrator` or one of the agents to use the new command.
-
-### `CHANGELOG.md`
-
-The `CHANGELOG.md` file is the source of truth for the project's history and the TODO list for
-future development. All changes should be reflected in this file. When you are asked to complete a
-task, you should look for it in the `CHANGELOG.md` TODO list and mark it as complete when you are
-done.
-
-### Running Tests
-
-The project has unit tests in the `app_android` module. To run them, use the following command from
-the root of the project:
-
-```bash
-./gradlew :app_android:test
+```
+app/src/main/res/raw/animation.mp4
 ```
 
-### Version Catalogs
+It is referenced as `R.raw.animation` and played through Media3 / ExoPlayer. Replacing a WebP in either legacy implementation does not replace the native animation.
 
-The project uses a Gradle Version Catalog (`gradle/libs.versions.toml`) to manage dependencies. All
-dependencies should be added to this file.
+`ExpirationManager.kt` persists the expiration timestamp locally in `SharedPreferences`.
+
+`GitHubUpdater.kt` checks:
+
+```
+https://api.github.com/repos/hereliesaz/LeFauxPass/releases/latest
+```
+
+It downloads an APK into app cache and launches Android's package installer via `FileProvider`.
+
+## Build
+
+Use the root Gradle wrapper:
+
+```sh
+./gradlew assembleDebug
+```
+
+Useful verification:
+
+```sh
+./gradlew testDebugUnitTest assembleDebug
+```
+
+The Gradle daemon is pinned to JDK 17 by `gradle/gradle-daemon-jvm.properties`. Android compile options and the Kotlin JVM target are 21.
+
+Do not regenerate a vendor-specific daemon toolchain file unless required. A previous JetBrains JDK 21 auto-provisioning configuration caused CI failures because the provisioned toolchain did not satisfy Gradle's required JDK executables.
+
+## CI / release behavior
+
+`.github/workflows/build-apk.yml` currently:
+
+1. checks out the repository,
+2. injects optional service configuration,
+3. generates the signing keystore from repository secrets,
+4. sets up Temurin JDK 17,
+5. runs `assembleDebug`,
+6. creates a GitHub issue on build failure,
+7. publishes/updates a rolling prerelease on successful pushes.
+
+The repository default branch is `master`, while the workflow's `pull_request` filter currently names `main`. Do not assume PR CI runs for `master` until that workflow is changed.
+
+The in-app updater uses GitHub's `releases/latest` endpoint, which normally resolves the latest non-prerelease release. The rolling CI release is a prerelease. Treat those as separate channels unless the updater or release policy is changed.
+
+## Versioning
+
+`version.properties` is the root version input. At this documentation revision it contains:
+
+```
+versionMajor=1
+versionMinor=2
+versionPatch=0
+versionBuild=6
+```
+
+The Android Gradle configuration derives `versionName` from major/minor/patch. CI also derives release asset names from repository history and build count.
+
+## Change discipline
+
+- Prefer one coherent commit for one requested change set.
+- Preserve existing behavior unless the user asks to alter it.
+- Verify the actual referenced asset or code path before replacing media.
+- Do not infer that a published APK matches `master`; inspect the release target commit when that distinction matters.
+- Keep documentation synchronized with implementation changes.
+- Never put credentials, signing material, API keys, or generated keystores into source control.
+- Avoid editing generated or unrelated legacy files simply because they have similar names.
+
+## Documentation
+
+Repository-facing documentation consists of:
+
+- `README.md` — project overview and current architecture
+- `AGENTS.md` — automation/development guidance
+- `LeFauxPassRN/README.md` — status and setup of the alternate RN prototype
+- `app/src/main/assets/privacy_policy.txt` — privacy disclosure bundled with the Android app
+
+When behavior affecting networking, storage, permissions, releases, or the animation changes, update the relevant documentation in the same change set.
+
+_Last updated: September 20, 2026._

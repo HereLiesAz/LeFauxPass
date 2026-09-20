@@ -1,29 +1,45 @@
 Privacy Policy for LeFauxPass
 
-Last updated: August 17, 2025
+Last updated: September 20, 2026
 
-This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of your information when You use the Service and tells You about Your privacy rights and how the law protects You.
+LeFauxPass is an unofficial Android application. This policy describes the data behavior visible in the current source code.
 
-Information Collection and Use
+Information Stored on the Device
 ================================
 
-LeFauxPass is a standalone application that does not collect, store, or transmit any personal information or data from your device. All functionality of the app is performed locally on your device. We do not have access to any of your data.
+LeFauxPass stores a ticket expiration timestamp locally in Android SharedPreferences. The app does not contain an account system, advertising SDK, analytics SDK, or project-operated backend, and the current source does not send that stored expiration timestamp to the developer.
+
+Android backup is enabled in the application manifest. Depending on the Android version, device settings, and platform backup behavior, locally stored app data may be included in Android backup or device-transfer systems.
+
+Network Access
+==============
+
+LeFauxPass connects to GitHub to check for application updates and to download APK release assets. Those requests are made to GitHub infrastructure, so GitHub may receive ordinary network metadata associated with a request, such as an IP address and request headers, according to GitHub's own policies.
+
+LeFauxPass does not operate a separate server that receives these update requests.
 
 Permissions
 ===========
 
-LeFauxPass does not request any special permissions to run.
+The application currently declares:
+
+* INTERNET — used to query GitHub releases and download APK updates.
+* REQUEST_INSTALL_PACKAGES — used so the app can hand a downloaded APK to Android's package installer.
+
+Downloaded update APKs are written to the application's cache directory before installation is requested.
+
+Third-Party Services
+====================
+
+The update feature uses GitHub's public API and release hosting. Use of GitHub infrastructure is subject to GitHub's applicable privacy terms and policies.
 
 Changes to this Privacy Policy
 ==============================
 
-We may update Our Privacy Policy from time to time. We will notify You of any changes by posting the new Privacy Policy on this page.
+This policy may be updated when application behavior changes. The version bundled with the app should be kept synchronized with networking, storage, permission, analytics, and update behavior.
 
-You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.
+Contact
+=======
 
-Contact Us
-==========
-
-If you have any questions about this Privacy Policy, You can contact us:
-
-* By email: [Your Contact Email Here]
+Questions or corrections can be submitted through the LeFauxPass GitHub repository issue tracker:
+https://github.com/HereLiesAz/LeFauxPass/issues
