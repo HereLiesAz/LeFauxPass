@@ -50,6 +50,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -94,7 +95,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             LeFauxPassTheme {
-                RtaTicketScreen()
+                // Details screen first; confirming activation shows the live ticket.
+                var activated by rememberSaveable { mutableStateOf(false) }
+                if (activated) {
+                    RtaTicketScreen()
+                } else {
+                    TicketDetailsScreen(onActivate = { activated = true })
+                }
             }
         }
     }

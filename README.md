@@ -25,6 +25,8 @@ app/src/main/res/raw/animation.mp4
 
 `MainActivity.kt` loads it as `R.raw.animation` with Media3, starts playback automatically, and loops it continuously without player controls. The replacement MP4 currently in `master` is the source used by native Android builds.
 
+The app opens on a dark "Ticket Details" screen (`TicketDetailsScreen.kt`). "Activate ticket" raises a confirmation bottom sheet; "Activate" moves to the animated ticket screen. Activation state is held for the activity session only.
+
 The similarly named WebP assets under `LeFauxPassRN/` and `rta-ticket-clone/` belong to those separate implementations and do not control the native Android app.
 
 ## Ticket state

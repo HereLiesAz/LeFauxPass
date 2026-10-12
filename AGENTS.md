@@ -18,7 +18,7 @@ The canonical implementation is the native Android project at the repository roo
 
 ## Current native behavior
 
-`MainActivity.kt` renders the ticket screen, live clock, expiration information, and the looping animation.
+`MainActivity.kt` opens on `TicketDetailsScreen` (`TicketDetailsScreen.kt`); "Activate ticket" shows a confirmation bottom sheet, and "Activate" switches to the ticket screen, which renders live clock, expiration information, and the looping animation.
 
 The production animation asset is:
 
