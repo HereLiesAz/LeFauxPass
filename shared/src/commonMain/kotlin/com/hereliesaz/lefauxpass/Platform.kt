@@ -68,8 +68,6 @@ internal object TimeFormat {
     /** `MMM dd, yyyy, h:mm a` */
     fun long(ms: Long) = localParts(ms).run { "${months[month - 1]} ${day.pad()}, $year, $h12:${minute.pad()} $amPm" }
 
-    /** `M/d/yyyy, h:mm a`, or `h:mma` when [spaced] is false. */
-    fun short(ms: Long, spaced: Boolean = true) = localParts(ms).run {
-        "$month/$day/$year, $h12:${minute.pad()}${if (spaced) " " else ""}$amPm"
-    }
+    /** `M/d/yyyy, h:mm a` */
+    fun short(ms: Long) = localParts(ms).run { "$month/$day/$year, $h12:${minute.pad()} $amPm" }
 }

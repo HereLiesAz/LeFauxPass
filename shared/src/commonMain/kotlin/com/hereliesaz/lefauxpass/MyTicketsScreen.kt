@@ -60,7 +60,8 @@ fun MyTicketsScreen(onViewTicket: () -> Unit) {
     platform.SystemBarColor(DetailsTopBar)
 
     val activeUntil = remember {
-        TimeFormat.short(platform.loadExpiration() ?: (nowMillis() + TICKET_LIFETIME_MS), spaced = false)
+        // Same text as the ticket screen's "Expires".
+        TimeFormat.long(platform.loadExpiration() ?: (nowMillis() + TICKET_LIFETIME_MS))
     }
 
     Scaffold(
