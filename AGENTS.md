@@ -84,8 +84,8 @@ Pull requests targeting `master` are built but do not publish releases. The roll
 `version.properties` is the root version input. At this documentation revision it contains:
 
 ```
-versionMajor=1
-versionMinor=2
+versionMajor=2
+versionMinor=0
 versionPatch=0
 versionBuild=6
 ```
