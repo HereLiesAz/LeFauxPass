@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.annotation.RawRes
 import androidx.appcompat.app.AppCompatActivity
@@ -50,6 +51,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -89,12 +91,23 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
+private enum class Screen { Details, Ticket, MyTickets }
+
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             LeFauxPassTheme {
-                RtaTicketScreen()
+                // Details -> (Activate) -> Ticket <-> My tickets (back / card tap).
+                var screen by rememberSaveable { mutableStateOf(Screen.Details) }
+                when (screen) {
+                    Screen.Details -> TicketDetailsScreen(onActivate = { screen = Screen.Ticket })
+                    Screen.Ticket -> {
+                        BackHandler { screen = Screen.MyTickets }
+                        RtaTicketScreen(onBack = { screen = Screen.MyTickets })
+                    }
+                    Screen.MyTickets -> MyTicketsScreen(onViewTicket = { screen = Screen.Ticket })
+                }
             }
         }
     }
@@ -109,7 +122,7 @@ class MainActivity : AppCompatActivity() {
 @SuppressLint("SourceLockedOrientationActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RtaTicketScreen() {
+fun RtaTicketScreen(onBack: () -> Unit = {}) {
     val context = LocalContext.current
     (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
@@ -152,10 +165,7 @@ fun RtaTicketScreen() {
             TopAppBar(
                 title = { },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        val formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy, h:mm a")
-                        (null as ZonedDateTime?)!!.format(formatter)
-                    }) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
