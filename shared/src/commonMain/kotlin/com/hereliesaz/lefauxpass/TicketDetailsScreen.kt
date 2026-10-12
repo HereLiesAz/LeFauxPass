@@ -1,6 +1,5 @@
 package com.hereliesaz.lefauxpass
 
-import android.app.Activity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,7 +36,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,21 +52,13 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
-import com.hereliesaz.lefauxpass.ui.theme.LeFauxPassTheme
 import kotlinx.coroutines.launch
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 
 // Dark palette sampled from the reference screenshots.
 internal val DetailsBackground = Color(0xFF1B1C20)
@@ -86,25 +76,14 @@ internal val PrimaryText = Color(0xFFE4E4E8)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TicketDetailsScreen(onActivate: () -> Unit) {
-    val context = LocalContext.current
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = DetailsTopBar.toArgb()
-            window.navigationBarColor = DetailsTopBar.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
-        }
-    }
+    val platform = LocalPlatform.current
+    platform.SystemBarColor(DetailsTopBar)
 
     // Shows the stored expiration if still valid, else the one activation would create.
-    val expiration = remember {
-        ExpirationManager.getExpirationTime(context)
-            ?.takeIf { it.isAfter(ZonedDateTime.now()) }
-            ?: ZonedDateTime.now().plusHours(1).plusMinutes(56)
-    }
-    val expirationText = remember(expiration) {
-        expiration.format(DateTimeFormatter.ofPattern("M/d/yyyy, h:mm a"))
+    val expirationText = remember {
+        val expiration = platform.loadExpiration()?.takeIf { it > nowMillis() }
+            ?: (nowMillis() + TICKET_LIFETIME_MS)
+        TimeFormat.short(expiration)
     }
 
     var showSheet by rememberSaveable { mutableStateOf(false) }
@@ -116,7 +95,7 @@ fun TicketDetailsScreen(onActivate: () -> Unit) {
             TopAppBar(
                 title = { Text("Ticket Details", fontSize = 20.sp) },
                 navigationIcon = {
-                    IconButton(onClick = { (context as? Activity)?.finish() }) {
+                    IconButton(onClick = platform::exit) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -373,8 +352,3 @@ private fun TicketGlyph(modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(widthDp = 360, heightDp = 740)
-@Composable
-fun TicketDetailsScreenPreview() {
-    LeFauxPassTheme { TicketDetailsScreen(onActivate = {}) }
-}
