@@ -1,8 +1,6 @@
 package com.hereliesaz.lefauxpass
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -40,7 +38,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hereliesaz.lefauxpass.ui.theme.MediumGrayTextColor
+import com.hereliesaz.lefauxpass.ui.theme.TicketSecondaryTextColor
+import com.hereliesaz.lefauxpass.ui.theme.TicketTextColor
 import com.hereliesaz.lefauxpass.ui.theme.TopBarColor
 import kotlinx.coroutines.delay
 
@@ -74,14 +73,13 @@ fun RtaTicketScreen(onBack: () -> Unit = {}) {
                     }
                 },
                 actions = {
-                    platform.checkForUpdates?.let { check ->
-                        IconButton(onClick = { check(true) }) {
-                            Icon(
-                                imageVector = Icons.Outlined.Info,
-                                contentDescription = "Information",
-                                tint = Color(0xFFB865D0)
-                            )
-                        }
+                    // Shown everywhere to match the reference; inert where there is no updater (web).
+                    IconButton(onClick = { platform.checkForUpdates?.invoke(true) }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = "Information",
+                            tint = Color(0xFFB865D0)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -106,25 +104,25 @@ fun RtaTicketScreen(onBack: () -> Unit = {}) {
                     .alpha(if (isVideoReady) 1f else 0f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(63.dp))
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
                         text = "RTA",
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black,
+                        color = TicketTextColor,
                     )
 
                     Text(
                         text = "Show operator your ticket",
-                        fontSize = 16.sp,
-                        color = MediumGrayTextColor
+                        fontSize = 14.sp,
+                        color = TicketTextColor
                     )
                 }
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 platform.AnimationPlayer(
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
@@ -132,8 +130,9 @@ fun RtaTicketScreen(onBack: () -> Unit = {}) {
                         .background(Color.White),
                     onReady = { isVideoReady = true }
                 )
+                Spacer(modifier = Modifier.height(22.dp))
                 LiveClock()
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 TicketInfoCard(expirationTime = expirationTime)
                 Spacer(modifier = Modifier.height(20.dp))
                 Spacer(modifier = Modifier.weight(1f))
@@ -158,11 +157,11 @@ fun LiveClock(modifier: Modifier = Modifier) {
 
     Text(
         text = TimeFormat.clock(currentTime),
-        fontSize = 48.sp,
+        fontSize = 44.sp,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
-        color = Color.Black,
-        modifier = modifier.fillMaxWidth(0.75f),
+        color = TicketTextColor,
+        modifier = modifier.fillMaxWidth(),
         maxLines = 1
     )
 }
@@ -177,31 +176,29 @@ fun TicketInfoCard(expirationTime: Long?, modifier: Modifier = Modifier) {
 
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f)),
+        shape = RoundedCornerShape(4.dp),
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 2.dp
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
                 text = "Adult Single Ride, Bus & Streetcar",
-                fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                color = Color.Black
+                color = TicketTextColor
             )
             Text(
                 text = "New Orleans, LA",
-                color = Color.Black,
-                fontSize = 14.sp
+                color = TicketSecondaryTextColor,
+                fontSize = 11.sp
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = expirationText,
-                color = Color.Black,
-                fontSize = 16.sp
+                color = TicketSecondaryTextColor,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp
             )
         }
     }
