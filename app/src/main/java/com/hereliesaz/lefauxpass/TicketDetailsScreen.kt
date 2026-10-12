@@ -71,13 +71,13 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 // Dark palette sampled from the reference screenshots.
-private val DetailsBackground = Color(0xFF1B1C20)
-private val DetailsTopBar = Color(0xFF222327)
-private val SheetBackground = Color(0xFF232529)
-private val Accent = Color(0xFFD05CE0)
+internal val DetailsBackground = Color(0xFF1B1C20)
+internal val DetailsTopBar = Color(0xFF222327)
+internal val SheetBackground = Color(0xFF232529)
+internal val Accent = Color(0xFFD05CE0)
 private val OnAccent = Color(0xFF2A1030)
-private val SecondaryText = Color(0xFF9A9BA0)
-private val PrimaryText = Color(0xFFE4E4E8)
+internal val SecondaryText = Color(0xFF9A9BA0)
+internal val PrimaryText = Color(0xFFE4E4E8)
 
 /**
  * Pre-activation "Ticket Details" screen. "Activate ticket" opens a
@@ -331,7 +331,7 @@ private fun LePassCard(modifier: Modifier = Modifier) {
 
 /** Double chevron in the RTA mark style; one color per chevron. */
 @Composable
-private fun Chevrons(colors: List<Color>, modifier: Modifier = Modifier) {
+internal fun Chevrons(colors: List<Color>, modifier: Modifier = Modifier) {
     Canvas(modifier) {
         val w = size.width
         val h = size.height

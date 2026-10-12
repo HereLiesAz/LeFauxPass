@@ -18,7 +18,7 @@ The canonical implementation is the native Android project at the repository roo
 
 ## Current native behavior
 
-`MainActivity.kt` opens on `TicketDetailsScreen` (`TicketDetailsScreen.kt`); "Activate ticket" shows a confirmation bottom sheet, and "Activate" switches to the ticket screen, which renders live clock, expiration information, and the looping animation.
+`MainActivity.kt` opens on `TicketDetailsScreen` (`TicketDetailsScreen.kt`); "Activate ticket" shows a confirmation bottom sheet, "Activate" switches to the ticket screen, and back (arrow or system) from the ticket screen opens `MyTicketsScreen` (`MyTicketsScreen.kt`), whose green active-ride card returns to the ticket screen. The ticket screen renders live clock, expiration information, and the looping animation.
 
 The production animation asset is:
 
