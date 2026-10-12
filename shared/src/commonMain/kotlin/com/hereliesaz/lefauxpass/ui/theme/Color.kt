@@ -17,5 +17,9 @@ val ScreenBackground = Color(0xFFFFFDFE)
 val CardBackground = Color(0xFFF5F5F5)
 val DividerColor = Color(0xFFE0E0E0)
 val DarkGray = Color(0xFFA9A9A9)
-val TopBarColor = Color(0xFF303235)
+val TopBarColor = Color(0xFF202226)
 val MediumGrayTextColor = Color(0xFF757575)
+
+// Ticket screen text, sampled from the reference screenshot.
+val TicketTextColor = Color(0xFF36383A)
+val TicketSecondaryTextColor = Color(0xFF5C5E5F)
