@@ -79,7 +79,7 @@ fun MyTicketsScreen(onViewTicket: () -> Unit) {
 
     val activeUntil = remember {
         (ExpirationManager.getExpirationTime(context) ?: ZonedDateTime.now().plusHours(1).plusMinutes(56))
-            .format(DateTimeFormatter.ofPattern("M/d/yyyy, h:mma"))
+            .format(DateTimeFormatter.ofPattern("MMM dd, yyyy, h:mm a")) // Same text as the ticket screen's "Expires".
     }
 
     Scaffold(
