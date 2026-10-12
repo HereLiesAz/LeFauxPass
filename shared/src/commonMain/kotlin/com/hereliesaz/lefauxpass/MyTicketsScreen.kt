@@ -1,9 +1,9 @@
 package com.hereliesaz.lefauxpass
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,9 +19,6 @@ import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.ConfirmationNumber
-import androidx.compose.material.icons.outlined.Directions
-import androidx.compose.material.icons.outlined.LinearScale
-import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -40,10 +37,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hereliesaz.lefauxpass.shared.resources.Res
+import com.hereliesaz.lefauxpass.shared.resources.rta_logo
+import com.hereliesaz.lefauxpass.shared.resources.tab_directions
+import com.hereliesaz.lefauxpass.shared.resources.tab_lines
+import com.hereliesaz.lefauxpass.shared.resources.tab_map
+import com.hereliesaz.lefauxpass.shared.resources.tab_tickets
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 
 private val ActiveGreen = Color(0xFF1FC27A)
 private val CardSurface = Color(0xFF232529)
@@ -93,10 +97,11 @@ fun MyTicketsScreen(onViewTicket: () -> Unit) {
                     unselectedTextColor = PrimaryText,
                     indicatorColor = Color.Transparent
                 )
-                NavTab(Icons.Outlined.Directions, "Directions", false, colors)
-                NavTab(Icons.Outlined.Place, "Map", false, colors)
-                NavTab(Icons.Outlined.LinearScale, "Lines", false, colors)
-                NavTab(Icons.Filled.ConfirmationNumber, "Tickets", true, colors)
+                // Icons sliced from the reference screenshot.
+                NavTab(Res.drawable.tab_directions, "Directions", false, colors)
+                NavTab(Res.drawable.tab_map, "Map", false, colors)
+                NavTab(Res.drawable.tab_lines, "Lines", false, colors)
+                NavTab(Res.drawable.tab_tickets, "Tickets", true, colors)
             }
         },
         containerColor = DetailsBackground
@@ -119,12 +124,11 @@ fun MyTicketsScreen(onViewTicket: () -> Unit) {
             ) {
                 Column(Modifier.padding(horizontal = 12.dp, vertical = 16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier.size(22.dp).background(Color.White),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Chevrons(listOf(Color(0xFF5B2C83), Color(0xFF4E8A2E)), Modifier.size(14.dp))
-                        }
+                        Image(
+                            painter = painterResource(Res.drawable.rta_logo),
+                            contentDescription = null,
+                            modifier = Modifier.size(22.dp)
+                        )
                         Spacer(Modifier.width(10.dp))
                         Column {
                             Text("Adult Single Ride, Bus & Streetcar", color = PrimaryText, fontSize = 16.sp)
@@ -198,7 +202,7 @@ private fun SectionTitle(text: String) {
 
 @Composable
 private fun androidx.compose.foundation.layout.RowScope.NavTab(
-    icon: ImageVector,
+    icon: DrawableResource,
     label: String,
     selected: Boolean,
     colors: androidx.compose.material3.NavigationBarItemColors
@@ -206,7 +210,7 @@ private fun androidx.compose.foundation.layout.RowScope.NavTab(
     NavigationBarItem(
         selected = selected,
         onClick = {},
-        icon = { Icon(icon, contentDescription = null) },
+        icon = { Image(painterResource(icon), contentDescription = null, modifier = Modifier.height(20.dp)) },
         label = { Text(label) },
         colors = colors
     )

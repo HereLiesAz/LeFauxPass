@@ -23,6 +23,8 @@ The canonical implementation is the Compose Multiplatform project at the reposit
 
 Screens live in `shared/src/commonMain`. Platform specifics go through `PlatformHooks` (`Platform.kt`): Android implements it in `MainActivity.kt`; the PWA in `shared/src/wasmJsMain` (`WebPlatformHooks.kt`: localStorage, an HTML `<video>` overlaid on the Compose canvas, browser-history back). The PWA has no updater; new deploys reach it through its network-first service worker (`sw.js`).
 
+The Le Pass card, the RTA logo square, and the My tickets tab icons are bitmaps sliced from reference screenshots (`shared/src/commonMain/composeResources/drawable`); the repo has no script font for the "Le Pass" watermark.
+
 The production animation asset is:
 
 ```
