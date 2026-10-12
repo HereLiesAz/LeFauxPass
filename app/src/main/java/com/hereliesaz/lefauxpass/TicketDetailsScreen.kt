@@ -97,12 +97,8 @@ fun TicketDetailsScreen(onActivate: () -> Unit) {
         }
     }
 
-    // Shows the stored expiration if still valid, else the one activation would create.
-    val expiration = remember {
-        ExpirationManager.getExpirationTime(context)
-            ?.takeIf { it.isAfter(ZonedDateTime.now()) }
-            ?: ZonedDateTime.now().plusHours(1).plusMinutes(56)
-    }
+    // Unactivated ticket: valid for three months from today.
+    val expiration = remember { ZonedDateTime.now().plusMonths(3) }
     val expirationText = remember(expiration) {
         expiration.format(DateTimeFormatter.ofPattern("M/d/yyyy, h:mm a"))
     }
