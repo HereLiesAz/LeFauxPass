@@ -79,12 +79,8 @@ fun TicketDetailsScreen(onActivate: () -> Unit) {
     val platform = LocalPlatform.current
     platform.SystemBarColor(DetailsTopBar)
 
-    // Shows the stored expiration if still valid, else the one activation would create.
-    val expirationText = remember {
-        val expiration = platform.loadExpiration()?.takeIf { it > nowMillis() }
-            ?: (nowMillis() + TICKET_LIFETIME_MS)
-        TimeFormat.short(expiration)
-    }
+    // Unactivated ticket: valid for three months from today.
+    val expirationText = remember { TimeFormat.short(nowPlusMonths(3)) }
 
     var showSheet by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)

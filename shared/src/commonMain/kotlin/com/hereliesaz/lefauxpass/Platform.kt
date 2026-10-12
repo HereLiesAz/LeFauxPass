@@ -54,6 +54,21 @@ internal data class DateParts(
 /** Lifetime of a freshly activated ticket: 1h56m. */
 internal const val TICKET_LIFETIME_MS = (60 + 56) * 60 * 1000L
 
+/** Current local time plus [months] calendar months, day clamped to the month's end. */
+internal fun nowPlusMonths(months: Int): DateParts {
+    val now = localParts(nowMillis())
+    val total = now.year * 12 + (now.month - 1) + months
+    val year = total / 12
+    val month = total % 12 + 1
+    val leap = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
+    val lastDay = when (month) {
+        2 -> if (leap) 29 else 28
+        4, 6, 9, 11 -> 30
+        else -> 31
+    }
+    return now.copy(year = year, month = month, day = minOf(now.day, lastDay))
+}
+
 /** US-style formatting, matching the original `java.time` patterns. */
 internal object TimeFormat {
     private val months = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
@@ -69,5 +84,6 @@ internal object TimeFormat {
     fun long(ms: Long) = localParts(ms).run { "${months[month - 1]} ${day.pad()}, $year, $h12:${minute.pad()} $amPm" }
 
     /** `M/d/yyyy, h:mm a` */
-    fun short(ms: Long) = localParts(ms).run { "$month/$day/$year, $h12:${minute.pad()} $amPm" }
+    fun short(ms: Long) = short(localParts(ms))
+    fun short(p: DateParts) = p.run { "$month/$day/$year, $h12:${minute.pad()} $amPm" }
 }
