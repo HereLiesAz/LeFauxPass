@@ -7,7 +7,7 @@ LeFauxPass is an unofficial Android application. This policy describes the data 
 Information Stored on the Device
 ================================
 
-LeFauxPass stores a ticket expiration timestamp locally in Android SharedPreferences. The app does not contain an account system, advertising SDK, analytics SDK, or project-operated backend, and the current source does not send that stored expiration timestamp to the developer.
+LeFauxPass stores a ticket expiration timestamp locally: in Android SharedPreferences, or in browser localStorage for the web (PWA) version, which is served by GitHub Pages and caches its own files in the browser for offline use. The app does not contain an account system, advertising SDK, analytics SDK, or project-operated backend, and the current source does not send that stored expiration timestamp to the developer.
 
 Android backup is enabled in the application manifest. Depending on the Android version, device settings, and platform backup behavior, locally stored app data may be included in Android backup or device-transfer systems.
 

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.annotation.RawRes
 import androidx.appcompat.app.AppCompatActivity
@@ -51,7 +50,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -80,36 +78,24 @@ import androidx.media3.datasource.RawResourceDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
-import com.hereliesaz.lefauxpass.ui.theme.LeFauxPassTheme
-import com.hereliesaz.lefauxpass.ui.theme.MediumGrayTextColor
-import com.hereliesaz.lefauxpass.ui.theme.TopBarColor
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.time.LocalTime
+import java.time.Instant
+import java.time.ZoneId
 import java.time.ZonedDateTime
+import androidx.lifecycle.lifecycleScope
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
-private enum class Screen { Details, Ticket, MyTickets }
-
 class MainActivity : AppCompatActivity() {
+    @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            LeFauxPassTheme {
-                // Details -> (Activate) -> Ticket <-> My tickets (back / card tap).
-                var screen by rememberSaveable { mutableStateOf(Screen.Details) }
-                when (screen) {
-                    Screen.Details -> TicketDetailsScreen(onActivate = { screen = Screen.Ticket })
-                    Screen.Ticket -> {
-                        BackHandler { screen = Screen.MyTickets }
-                        RtaTicketScreen(onBack = { screen = Screen.MyTickets })
-                    }
-                    Screen.MyTickets -> MyTicketsScreen(onViewTicket = { screen = Screen.Ticket })
-                }
-            }
-        }
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        val hooks = AndroidPlatformHooks(this)
+        setContent { App(hooks) }
     }
 
     override fun onResume() {
@@ -118,147 +104,57 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-// region RtaTicketScreen
-@SuppressLint("SourceLockedOrientationActivity")
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun RtaTicketScreen(onBack: () -> Unit = {}) {
-    val context = LocalContext.current
-    (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+/** Android side of the shared UI: SharedPreferences, ExoPlayer, GitHub updater. */
+private class AndroidPlatformHooks(private val activity: AppCompatActivity) : PlatformHooks {
+    override fun loadExpiration(): Long? =
+        ExpirationManager.getExpirationTime(activity)?.toInstant()?.toEpochMilli()
 
-    val isInPreview = LocalInspectionMode.current
-    var expirationTime by remember { mutableStateOf<ZonedDateTime?>(null) }
-    var isVideoReady by remember { mutableStateOf(isInPreview) }
-    val coroutineScope = rememberCoroutineScope()
+    override fun saveExpiration(epochMs: Long) = ExpirationManager.setExpirationTime(
+        activity,
+        ZonedDateTime.ofInstant(Instant.ofEpochMilli(epochMs), ZoneId.systemDefault())
+    )
 
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = TopBarColor.toArgb()
-            window.navigationBarColor = TopBarColor.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
-        }
-    }
+    override fun exit() = activity.finish()
 
-    LaunchedEffect(Unit) {
-        if (isInPreview) {
-            expirationTime = ZonedDateTime.now().plusHours(1).plusMinutes(56)
-        } else {
-            var storedExpiration = ExpirationManager.getExpirationTime(context)
-            if (storedExpiration == null || storedExpiration.isBefore(ZonedDateTime.now())) {
-                storedExpiration = ZonedDateTime.now().plusHours(1).plusMinutes(56)
-                ExpirationManager.setExpirationTime(context, storedExpiration)
-            }
-            expirationTime = storedExpiration
-
+    override val checkForUpdates: (Boolean) -> Unit = { manual ->
+        activity.lifecycleScope.launch {
             GitHubUpdater.checkForUpdates(
-                context = context,
-                showToastIfUpToDate = false,
-                force = false
+                context = activity,
+                showToastIfUpToDate = manual,
+                force = manual
             )
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {
-                        coroutineScope.launch {
-                            GitHubUpdater.checkForUpdates(
-                                context = context,
-                                showToastIfUpToDate = true,
-                                force = true
-                            )
-                        }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = "Information",
-                            tint = Color(0xFFB865D0)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = TopBarColor,
-                    navigationIconContentColor = Color.White,
-                    actionIconContentColor = Color.White
-                )
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.surface
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp)
-                    .alpha(if (isVideoReady) 1f else 0f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(20.dp))
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    Text(
-                        text = "RTA",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black,
-                    )
-
-                    Text(
-                        text = "Show operator your ticket",
-                        fontSize = 16.sp,
-                        color = MediumGrayTextColor
-                    )
-                }
-                Spacer(modifier = Modifier.height(20.dp))
-                if (!isInPreview) {
-                    VideoPlayer(
-                        videoRes = R.raw.animation,
-                        modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                            .aspectRatio(1f),
-                        onReady = { isVideoReady = true }
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                            .aspectRatio(1f)
-                            .background(Color.Gray),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Video Preview", color = Color.White)
-                    }
-                }
-                LiveClock()
-                Spacer(modifier = Modifier.height(24.dp))
-                TicketInfoCard(expirationTime = expirationTime)
-                Spacer(modifier = Modifier.height(20.dp))
-                Spacer(modifier = Modifier.weight(1f))
+    @Composable
+    override fun AnimationPlayer(modifier: Modifier, onReady: () -> Unit) {
+        if (LocalInspectionMode.current) {
+            Box(modifier.background(Color.Gray), contentAlignment = Alignment.Center) {
+                Text("Video Preview", color = Color.White)
             }
-            if (!isVideoReady) {
-                CircularProgressIndicator()
+        } else {
+            VideoPlayer(modifier = modifier, videoRes = R.raw.animation, onReady = onReady)
+        }
+    }
+
+    @Composable
+    override fun SystemBarColor(color: Color) {
+        val view = LocalView.current
+        if (!view.isInEditMode) {
+            SideEffect {
+                val window = activity.window
+                window.statusBarColor = color.toArgb()
+                window.navigationBarColor = color.toArgb()
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
             }
         }
     }
+
+    @Composable
+    override fun BackHandler(onBack: () -> Unit) = androidx.activity.compose.BackHandler(onBack = onBack)
 }
 
+// region VideoPlayer
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayer(
@@ -319,78 +215,6 @@ fun VideoPlayer(
 }
 
 
-@Composable
-fun LiveClock(modifier: Modifier = Modifier) {
-    var currentTime by remember { mutableStateOf(LocalTime.now()) }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            currentTime = LocalTime.now()
-            delay(1000)
-        }
-    }
-
-    val formatter = remember { DateTimeFormatter.ofPattern("h:mm:ss a") }
-
-    Text(
-        text = currentTime.format(formatter),
-        fontSize = 48.sp,
-        fontWeight = FontWeight.Bold,
-        textAlign = TextAlign.Center,
-        color = Color.Black,
-        modifier = modifier.fillMaxWidth(0.75f),
-        maxLines = 1
-    )
-}
-
-@Composable
-fun TicketInfoCard(expirationTime: ZonedDateTime?, modifier: Modifier = Modifier) {
-    val formatter = remember { DateTimeFormatter.ofPattern("MMM dd, yyyy, h:mm a") }
-    val expirationText = if (expirationTime != null) {
-        "Expires ${expirationTime.format(formatter)}"
-    } else {
-        "Loading..."
-    }
-
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f)),
-        color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 2.dp
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(
-                text = "Adult Single Ride, Bus & Streetcar",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = Color.Black
-            )
-            Text(
-                text = "New Orleans, LA",
-                color = Color.Black,
-                fontSize = 14.sp
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = expirationText,
-                color = Color.Black,
-                fontSize = 16.sp
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 360, heightDp = 740)
-@Composable
-fun RtaTicketScreenPreview() {
-    LeFauxPassTheme {
-        RtaTicketScreen()
-    }
-}
 // endregion
 
 // region AnimationScreen

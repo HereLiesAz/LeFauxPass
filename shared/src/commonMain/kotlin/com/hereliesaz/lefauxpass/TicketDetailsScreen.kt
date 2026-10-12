@@ -1,10 +1,10 @@
 package com.hereliesaz.lefauxpass
 
-import android.app.Activity
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,18 +32,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,24 +49,16 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
-import com.hereliesaz.lefauxpass.ui.theme.LeFauxPassTheme
+import com.hereliesaz.lefauxpass.shared.resources.Res
+import com.hereliesaz.lefauxpass.shared.resources.le_pass_card
 import kotlinx.coroutines.launch
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import org.jetbrains.compose.resources.painterResource
+import androidx.compose.ui.layout.ContentScale
 
 // Dark palette sampled from the reference screenshots.
 internal val DetailsBackground = Color(0xFF1B1C20)
@@ -86,22 +76,11 @@ internal val PrimaryText = Color(0xFFE4E4E8)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TicketDetailsScreen(onActivate: () -> Unit) {
-    val context = LocalContext.current
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = DetailsTopBar.toArgb()
-            window.navigationBarColor = DetailsTopBar.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
-        }
-    }
+    val platform = LocalPlatform.current
+    platform.SystemBarColor(DetailsTopBar)
 
     // Unactivated ticket: valid for three months from today.
-    val expiration = remember { ZonedDateTime.now().plusMonths(3) }
-    val expirationText = remember(expiration) {
-        expiration.format(DateTimeFormatter.ofPattern("M/d/yyyy, h:mm a"))
-    }
+    val expirationText = remember { TimeFormat.short(nowPlusMonths(3)) }
 
     var showSheet by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -112,7 +91,7 @@ fun TicketDetailsScreen(onActivate: () -> Unit) {
             TopAppBar(
                 title = { Text("Ticket Details", fontSize = 20.sp) },
                 navigationIcon = {
-                    IconButton(onClick = { (context as? Activity)?.finish() }) {
+                    IconButton(onClick = platform::exit) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -210,11 +189,20 @@ fun TicketDetailsScreen(onActivate: () -> Unit) {
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                TextButton(onClick = {
-                    scope.launch { sheetState.hide() }.invokeOnCompletion { showSheet = false }
-                }) {
-                    Text("Activate later", color = Accent, fontSize = 16.sp)
-                }
+                // Plain text, no button container or hover/press layer.
+                Text(
+                    "Activate later",
+                    color = Accent,
+                    fontSize = 16.sp,
+                    modifier = Modifier
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            scope.launch { sheetState.hide() }.invokeOnCompletion { showSheet = false }
+                        }
+                        .padding(12.dp)
+                )
             }
         }
     }
@@ -248,101 +236,21 @@ private fun LinkRow(icon: androidx.compose.ui.graphics.vector.ImageVector, label
     }
 }
 
-/** Lavender gradient pass card with the "Le Pass / RTA" watermark. */
+/**
+ * Pass card artwork sliced from the reference screenshot (no script font for
+ * the "Le Pass" watermark exists in the repo); title, price and logo are baked in.
+ */
 @Composable
 private fun LePassCard(modifier: Modifier = Modifier) {
-    Box(
+    Image(
+        painter = painterResource(Res.drawable.le_pass_card),
+        contentDescription = "Adult Single Ride, Bus & Streetcar, \$1.25, New Orleans RTA",
+        contentScale = ContentScale.FillBounds,
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(1.66f)
+            .aspectRatio(843f / 506f)
             .clip(RoundedCornerShape(14.dp))
-            .background(
-                Brush.linearGradient(
-                    listOf(Color(0xFFE6E7F3), Color(0xFFB4B8E4), Color(0xFF8C93D2)),
-                    start = Offset(0f, Float.POSITIVE_INFINITY),
-                    end = Offset(Float.POSITIVE_INFINITY, 0f)
-                )
-            )
-    ) {
-        val watermark = Color.White.copy(alpha = 0.35f)
-        Column(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(top = 40.dp),
-            horizontalAlignment = Alignment.End
-        ) {
-            Text(
-                "Le Pass",
-                color = watermark,
-                fontSize = 64.sp,
-                fontFamily = FontFamily.Cursive,
-                fontStyle = FontStyle.Italic,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(end = 4.dp)
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(end = 40.dp)
-            ) {
-                Text(
-                    "RTA",
-                    color = watermark,
-                    fontSize = 36.sp,
-                    fontWeight = FontWeight.Black,
-                    fontStyle = FontStyle.Italic
-                )
-                Spacer(Modifier.width(8.dp))
-                Chevrons(listOf(watermark, watermark), Modifier.size(48.dp))
-            }
-        }
-        Column(Modifier.padding(16.dp)) {
-            Text(
-                "Adult Single Ride, Bus & Streetcar",
-                color = Color(0xFF1E1E24),
-                fontSize = 19.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.height(10.dp))
-            Text("$1.25", color = Color(0xFF3A3A44), fontSize = 13.sp)
-        }
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(26.dp)
-                    .background(Color.White),
-                contentAlignment = Alignment.Center
-            ) {
-                Chevrons(listOf(Color(0xFF5B2C83), Color(0xFF4E8A2E)), Modifier.size(18.dp))
-            }
-            Spacer(Modifier.width(10.dp))
-            Text("New Orleans RTA", color = Color(0xFF1E1E24), fontSize = 13.sp)
-        }
-    }
-}
-
-/** Double chevron in the RTA mark style; one color per chevron. */
-@Composable
-internal fun Chevrons(colors: List<Color>, modifier: Modifier = Modifier) {
-    Canvas(modifier) {
-        val w = size.width
-        val h = size.height
-        fun chevron(x: Float) = Path().apply {
-            moveTo(x, 0f)
-            lineTo(x + w * 0.3f, 0f)
-            lineTo(x + w * 0.6f, h / 2f)
-            lineTo(x + w * 0.3f, h)
-            lineTo(x, h)
-            lineTo(x + w * 0.3f, h / 2f)
-            close()
-        }
-        drawPath(chevron(0f), colors[0])
-        drawPath(chevron(w * 0.4f), colors[1])
-    }
+    )
 }
 
 /** Tilted blue ticket illustration for the activation sheet. */
@@ -369,8 +277,3 @@ private fun TicketGlyph(modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(widthDp = 360, heightDp = 740)
-@Composable
-fun TicketDetailsScreenPreview() {
-    LeFauxPassTheme { TicketDetailsScreen(onActivate = {}) }
-}

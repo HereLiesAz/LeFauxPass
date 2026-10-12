@@ -4,11 +4,12 @@ This file is the working guide for automated coding agents operating on **HereLi
 
 ## Source of truth
 
-The canonical implementation is the native Android project at the repository root:
+The canonical implementation is the Compose Multiplatform project at the repository root:
 
-- module: `:app`
+- module: `:shared` — all UI (common Compose), Android library + Kotlin/Wasm PWA targets
+- module: `:app` — Android host (`MainActivity`, ExoPlayer, `ExpirationManager`, `GitHubUpdater`)
 - package / application ID: `com.hereliesaz.lefauxpass`
-- UI: Kotlin + Jetpack Compose
+- UI: Kotlin + Compose Multiplatform (`shared/src/commonMain`)
 - default branch: `master`
 - min SDK: 26
 - compile / target SDK: 37
@@ -18,7 +19,11 @@ The canonical implementation is the native Android project at the repository roo
 
 ## Current native behavior
 
-`MainActivity.kt` opens on `TicketDetailsScreen` (`TicketDetailsScreen.kt`); "Activate ticket" shows a confirmation bottom sheet, "Activate" switches to the ticket screen, and back (arrow or system) from the ticket screen opens `MyTicketsScreen` (`MyTicketsScreen.kt`), whose green active-ride card returns to the ticket screen. The ticket screen renders live clock, expiration information, and the looping animation.
+`App.kt` (shared) opens on `TicketDetailsScreen`; "Activate ticket" shows a confirmation bottom sheet, "Activate" switches to the ticket screen, and back (arrow or system) from the ticket screen opens `MyTicketsScreen` (`MyTicketsScreen.kt`), whose green active-ride card returns to the ticket screen. The ticket screen renders live clock, expiration information, and the looping animation.
+
+Screens live in `shared/src/commonMain`. Platform specifics go through `PlatformHooks` (`Platform.kt`): Android implements it in `MainActivity.kt`; the PWA in `shared/src/wasmJsMain` (`WebPlatformHooks.kt`: localStorage, an HTML `<video>` overlaid on the Compose canvas, browser-history back). The PWA has no updater; new deploys reach it through its network-first service worker (`sw.js`).
+
+The Le Pass card, the RTA logo square, and the My tickets tab icons are bitmaps sliced from reference screenshots (`shared/src/commonMain/composeResources/drawable`); the repo has no script font for the "Le Pass" watermark.
 
 The production animation asset is:
 
@@ -26,7 +31,7 @@ The production animation asset is:
 app/src/main/res/raw/animation.mp4
 ```
 
-It is referenced as `R.raw.animation` and played through Media3 / ExoPlayer. Replacing a WebP in either legacy implementation does not replace the native animation.
+It is referenced as `R.raw.animation` and played through Media3 / ExoPlayer on Android. The PWA build copies the same file into its output (`wasmJsProcessResources`); there is no second copy in source control. Replacing a WebP in either legacy implementation does not replace the native animation.
 
 `ExpirationManager.kt` persists the expiration timestamp locally in `SharedPreferences`.
 
@@ -40,6 +45,12 @@ Use the root Gradle wrapper:
 
 ```sh
 ./gradlew assembleDebug
+```
+
+PWA (output in `shared/build/dist/wasmJs/productionExecutable`):
+
+```sh
+./gradlew :shared:wasmJsBrowserDistribution
 ```
 
 Useful verification:
@@ -63,6 +74,8 @@ Do not regenerate a vendor-specific daemon toolchain file unless required. A pre
 5. runs `assembleDebug` with the commit count supplied as `versionBuild`,
 6. creates a GitHub issue on build failure,
 7. publishes/updates the rolling prerelease only for successful pushes to `master`.
+
+`.github/workflows/deploy-pwa.yml` builds the PWA on every push/PR and deploys it to GitHub Pages from `master` only. Pages must be set to source "GitHub Actions" in repository settings.
 
 Pull requests targeting `master` are built but do not publish releases. The rolling release deletes stale APK assets before uploading the new one. The in-app updater intentionally consumes prereleases, so this rolling release is the active update channel.
 
