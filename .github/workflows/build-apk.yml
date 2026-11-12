@@ -222,6 +222,6 @@ jobs:
           fi
 
           gh release create "$GITHUB_REF_NAME" "$APK_FILE" build-tools.zip \
-            --verify-tag --prerelease \
+            --verify-tag \
             --title "$GITHUB_REF_NAME" \
             --notes "Auto-build from commit $GITHUB_SHA"

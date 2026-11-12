@@ -67,7 +67,7 @@ Do not regenerate a vendor-specific daemon toolchain file unless required. A pre
 4. sets up Temurin JDK 21,
 5. runs `assembleDebug` with the commit count supplied as `versionBuild`,
 6. creates a GitHub issue on build failure,
-7. publishes a new prerelease for successful version-tag pushes, using the triggering tag as the release title.
+7. publishes a new GitHub release for successful version-tag pushes, using the triggering tag as the release title.
 
 `.github/workflows/deploy-pwa.yml` builds the PWA on every push/PR and deploys it to GitHub Pages from `master` only. Pages must be set to source "GitHub Actions" in repository settings.
 

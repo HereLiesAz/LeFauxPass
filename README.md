@@ -79,8 +79,8 @@ Current workflow behavior:
 
 - pushes: all branches are built;
 - pull requests targeting `master` are built;
-- pushes of version tags beginning with a digit or with `v` followed by a digit build the tagged commit and publish a GitHub prerelease with that exact tag as its title;
-- each new prerelease contains the debug APK and build-tools archive. Publishing skips tags that already have a published release. An existing draft stops publication for review.
+- pushes of version tags beginning with a digit or with `v` followed by a digit build the tagged commit and publish a GitHub release with that exact tag as its title;
+- each new release contains the debug APK and build-tools archive. Publishing skips tags that already have a published release. An existing draft stops publication for review.
 
 CI passes the repository commit count as Android `versionCode`, and the APK `versionName` is `major.minor.patch.build`. This gives the updater a monotonic version to compare.
 
