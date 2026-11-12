@@ -11,6 +11,7 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.core.content.pm.PackageInfoCompat
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -45,6 +46,7 @@ object GitHubUpdater {
         val buildNumberHint: Long?
     )
 
+    /** Checks GitHub and downloads eligible updates on the I/O dispatcher. Safe to call from the UI. */
     suspend fun checkForUpdates(
         context: Context,
         showToastIfUpToDate: Boolean = false,
@@ -65,7 +67,9 @@ object GitHubUpdater {
 
             try {
                 val currentVersionCode = installedVersionCode(appContext)
-                val candidate = findUpdateCandidate(currentVersionCode)
+                val candidate = withContext(Dispatchers.IO) {
+                    findUpdateCandidate(currentVersionCode)
+                }
 
                 if (candidate == null) {
                     if (showToastIfUpToDate) {
@@ -76,7 +80,9 @@ object GitHubUpdater {
 
                 showToast(appContext, "Downloading update ${candidate.name}...", long = true)
 
-                val updateFile = downloadUpdate(appContext, candidate)
+                val updateFile = withContext(Dispatchers.IO) {
+                    downloadUpdate(appContext, candidate)
+                }
                 val archiveInfo = getArchivePackageInfo(appContext, updateFile)
                     ?: throw IllegalStateException("Downloaded APK could not be read.")
 
@@ -100,6 +106,8 @@ object GitHubUpdater {
                 }
 
                 beginInstall(appContext, updateFile)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (error: Exception) {
                 error.printStackTrace()
                 if (force || showToastIfUpToDate) {
