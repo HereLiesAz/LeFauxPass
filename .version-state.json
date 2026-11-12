@@ -1,7 +1,7 @@
 {
-  "run_id": "43320860230",
+  "run_id": "43327655641",
   "schema": 1,
-  "source_sha": "1d32d3124c52454b1bf2c438c1a55cfe909b6823",
-  "trigger_id": "lefauxpass-android-3.0.0",
-  "version": "3.0.0.1"
+  "source_sha": "565863e89e0442e543df72769fce9b3a1323ce7f",
+  "trigger_id": "lefauxpass-android-3.0.1",
+  "version": "3.0.1.1"
 }
