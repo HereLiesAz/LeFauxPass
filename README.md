@@ -73,14 +73,14 @@ gradle/libs.versions.toml
 
 ## CI and releases
 
-`.github/workflows/build-apk.yml` builds and publishes debug APKs on successful pushes. It also creates a GitHub issue when the Gradle build fails.
+`.github/workflows/build-apk.yml` builds debug APKs and publishes them from version-tag pushes. It also creates a GitHub issue when the Gradle build fails.
 
 Current workflow behavior:
 
 - pushes: all branches are built;
 - pull requests targeting `master` are built;
-- rolling GitHub prereleases are published only from successful pushes to `master`;
-- each rolling release keeps only the current APK asset plus optional build tools.
+- pushes of version tags beginning with a digit or with `v` followed by a digit build the tagged commit and publish a GitHub prerelease with that exact tag as its title;
+- each new prerelease contains the debug APK and build-tools archive. Publishing skips tags that already have a published release. An existing draft stops publication for review.
 
 CI passes the repository commit count as Android `versionCode`, and the APK `versionName` is `major.minor.patch.build`. This gives the updater a monotonic version to compare.
 

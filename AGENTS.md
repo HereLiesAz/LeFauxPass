@@ -73,11 +73,11 @@ Do not regenerate a vendor-specific daemon toolchain file unless required. A pre
 4. sets up Temurin JDK 21,
 5. runs `assembleDebug` with the commit count supplied as `versionBuild`,
 6. creates a GitHub issue on build failure,
-7. publishes/updates the rolling prerelease only for successful pushes to `master`.
+7. publishes a new prerelease for successful version-tag pushes, using the triggering tag as the release title.
 
 `.github/workflows/deploy-pwa.yml` builds the PWA on every push/PR and deploys it to GitHub Pages from `master` only. Pages must be set to source "GitHub Actions" in repository settings.
 
-Pull requests targeting `master` are built but do not publish releases. The rolling release deletes stale APK assets before uploading the new one. The in-app updater intentionally consumes prereleases, so this rolling release is the active update channel.
+Branch pushes and pull requests build without publishing releases. Version-tag pushes publish the APK and build-tools archive from the tagged commit. The workflow skips tags with published releases and leaves their assets intact. An existing draft stops publication for review. The in-app updater discovers new APKs through the Releases collection, including prereleases.
 
 ## Versioning
 
