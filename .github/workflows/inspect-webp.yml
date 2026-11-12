@@ -1,0 +1,61 @@
+name: Inspect WebP Frames (temporary)
+on:
+  push:
+    branches: [feature/compose-webp-reconstruction]
+    paths: [.github/workflows/inspect-webp.yml]
+jobs:
+  frames:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract source frame metadata and contact sheet
+        run: |
+          python -m pip install pillow lz4
+          python - <<'PY'
+          from PIL import Image, ImageDraw, ImageOps
+          from collections import Counter
+          from pathlib import Path
+          src=Path('LeFauxPassRN/assets/animation.webp')
+          im=Image.open(src)
+          n=im.n_frames
+          print('SOURCE',src,'SIZE',im.size,'FRAMES',n)
+          durations=[]
+          counts=Counter()
+          thumbs=[]
+          indices=set(round(i*(n-1)/min(n-1,47)) for i in range(min(n,48))) if n>1 else {0}
+          for i in range(n):
+              im.seek(i)
+              durations.append(im.info.get('duration', 100))
+              frame=im.convert('RGBA')
+              if i in indices:
+                  thumb=ImageOps.contain(frame.convert('RGB'),(180,180))
+                  thumbs.append((i,thumb.copy()))
+                  counts.update(frame.convert('RGB').resize((40,40)).getdata())
+          print('TOTAL_DURATION_MS',sum(durations),'DURATIONS',Counter(durations).most_common(12))
+          print('DOMINANT_COLORS',counts.most_common(18))
+          cols=6
+          rows=(len(thumbs)+cols-1)//cols
+          sheet=Image.new('RGB',(cols*200,rows*210),'white')
+          d=ImageDraw.Draw(sheet)
+          for j,(idx,thumb) in enumerate(thumbs):
+              x=(j%cols)*200;y=(j//cols)*210
+              sheet.paste(thumb,(x,y))
+              d.text((x,y+184),f'{idx} @ {sum(durations[:idx])}ms',fill='black')
+          sheet.save('animation-contact.jpg',quality=85,optimize=True)
+          print('CONTACT_BYTES',Path('animation-contact.jpg').stat().st_size)
+          PY
+      - name: Generate exact Compose pixel data
+        run: |
+          python tools/rebuild_webp_frames.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add shared/src/commonMain/composeResources/files/animation-frames.lz4
+          git commit -m "feat: include all 237 exact WebP frames for Compose"
+          git push origin HEAD:feature/compose-webp-reconstruction
+      - name: Upload visual reference
+        uses: actions/upload-artifact@v4
+        with:
+          name: animation-contact
+          path: animation-contact.jpg
