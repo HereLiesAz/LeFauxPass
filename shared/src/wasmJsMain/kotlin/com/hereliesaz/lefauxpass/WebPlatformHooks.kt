@@ -13,12 +13,35 @@ import org.w3c.dom.HTMLMetaElement
 import org.w3c.dom.events.Event
 
 private const val KEY_EXPIRATION = "expiration_time"
+private const val KEY_RING_COLOR = "ring_color"
+private const val KEY_RING_COLOR_TIP = "ring_color_tip_seen"
 
 /** PWA side of the shared UI: localStorage and browser history. */
 object WebPlatformHooks : PlatformHooks {
     override fun loadExpiration(): Long? = localStorage.getItem(KEY_EXPIRATION)?.toLongOrNull()
 
     override fun saveExpiration(epochMs: Long) = localStorage.setItem(KEY_EXPIRATION, epochMs.toString())
+
+    // Retain appearance in the current page when the browser blocks storage.
+    private var sessionRingColor: String? = null
+    private var sessionRingColorTipSeen = false
+
+    override fun loadRingColor(): String? =
+        sessionRingColor ?: runCatching { localStorage.getItem(KEY_RING_COLOR) }.getOrNull()
+
+    override fun saveRingColor(colorId: String) {
+        sessionRingColor = colorId
+        runCatching { localStorage.setItem(KEY_RING_COLOR, colorId) }
+    }
+
+    override fun hasSeenRingColorTip(): Boolean =
+        sessionRingColorTipSeen || runCatching { localStorage.getItem(KEY_RING_COLOR_TIP) == "true" }
+            .getOrDefault(false)
+
+    override fun markRingColorTipSeen() {
+        sessionRingColorTipSeen = true
+        runCatching { localStorage.setItem(KEY_RING_COLOR_TIP, "true") }
+    }
 
     // A page cannot close itself; the browser owns leaving.
     override fun exit() = Unit

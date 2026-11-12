@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.hereliesaz.lefauxpass.ui.theme.LeFauxPassTheme
@@ -17,13 +18,27 @@ fun App(hooks: PlatformHooks) {
         LeFauxPassTheme {
             // Details -> (Activate) -> Ticket <-> My tickets (back / card tap).
             var screen by rememberSaveable { mutableStateOf(Screen.Details) }
+            var ringColor by remember(hooks) {
+                val storedColor = hooks.loadRingColor()
+                mutableStateOf(TicketRingColor.entries.firstOrNull { it.name == storedColor } ?: TicketRingColor.Pink)
+            }
             when (screen) {
                 Screen.Details -> TicketDetailsScreen(onActivate = { screen = Screen.Ticket })
                 Screen.Ticket -> {
                     hooks.BackHandler { screen = Screen.MyTickets }
-                    RtaTicketScreen(onBack = { screen = Screen.MyTickets })
+                    RtaTicketScreen(
+                        onBack = { screen = Screen.MyTickets },
+                        ringColors = ringColor.colors,
+                    )
                 }
-                Screen.MyTickets -> MyTicketsScreen(onViewTicket = { screen = Screen.Ticket })
+                Screen.MyTickets -> MyTicketsScreen(
+                    onViewTicket = { screen = Screen.Ticket },
+                    ringColor = ringColor,
+                    onRingColorSelected = { choice ->
+                        hooks.saveRingColor(choice.name)
+                        ringColor = choice
+                    },
+                )
             }
         }
     }

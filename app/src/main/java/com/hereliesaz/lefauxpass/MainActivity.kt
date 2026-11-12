@@ -1,6 +1,7 @@
 package com.hereliesaz.lefauxpass
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -41,6 +42,20 @@ private class AndroidPlatformHooks(private val activity: AppCompatActivity) : Pl
         activity,
         ZonedDateTime.ofInstant(Instant.ofEpochMilli(epochMs), ZoneId.systemDefault())
     )
+
+    private val ticketPreferences = activity.getSharedPreferences("ticket_appearance", Context.MODE_PRIVATE)
+
+    override fun loadRingColor(): String? = ticketPreferences.getString("ring_color", null)
+
+    override fun saveRingColor(colorId: String) {
+        ticketPreferences.edit().putString("ring_color", colorId).apply()
+    }
+
+    override fun hasSeenRingColorTip(): Boolean = ticketPreferences.getBoolean("ring_color_tip_seen", false)
+
+    override fun markRingColorTipSeen() {
+        ticketPreferences.edit().putBoolean("ring_color_tip_seen", true).apply()
+    }
 
     override fun exit() = activity.finish()
 

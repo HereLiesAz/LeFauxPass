@@ -14,6 +14,14 @@ interface PlatformHooks {
     fun loadExpiration(): Long?
     fun saveExpiration(epochMs: Long)
 
+    /** Stored ring palette identifier, or null for the default palette. */
+    fun loadRingColor(): String?
+    fun saveRingColor(colorId: String)
+
+    /** Whether the user has already seen the ring color tip. */
+    fun hasSeenRingColorTip(): Boolean
+    fun markRingColorTipSeen()
+
     /** Leaves the app (Ticket Details back arrow). */
     fun exit()
 

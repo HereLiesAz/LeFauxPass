@@ -4,21 +4,28 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.ConfirmationNumber
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,14 +36,21 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,13 +69,32 @@ private val PillBackground = Color(0xFF5A1470)
 
 /**
  * "My tickets" hub, reached by backing out of the ticket screen.
- * Tapping the active (green) ride card calls [onViewTicket].
+ * Tapping the active ride calls [onViewTicket]. The menu previews the current [ringColor]
+ * and sends changes to [onRingColorSelected].
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyTicketsScreen(onViewTicket: () -> Unit) {
+internal fun MyTicketsScreen(
+    onViewTicket: () -> Unit,
+    ringColor: TicketRingColor,
+    onRingColorSelected: (TicketRingColor) -> Unit,
+) {
     val platform = LocalPlatform.current
     platform.SystemBarColor(DetailsTopBar)
+
+    var showRingColorTip by remember { mutableStateOf(!platform.hasSeenRingColorTip()) }
+    if (showRingColorTip) {
+        LaunchedEffect(platform) { platform.markRingColorTipSeen() }
+        AlertDialog(
+            onDismissRequest = { showRingColorTip = false },
+            icon = { Icon(Icons.Filled.Menu, contentDescription = null) },
+            title = { Text("Change ring colors") },
+            text = { Text("Tap the menu in the top-left of My tickets and pick a color for your ticket rings.") },
+            confirmButton = {
+                TextButton(onClick = { showRingColorTip = false }) { Text("Got it") }
+            },
+        )
+    }
 
     val activeUntil = remember {
         // Same text as the ticket screen's "Expires".
@@ -73,7 +106,7 @@ fun MyTicketsScreen(onViewTicket: () -> Unit) {
             TopAppBar(
                 title = { Text("My tickets", fontSize = 20.sp) },
                 navigationIcon = {
-                    IconButton(onClick = {}) { Icon(Icons.Filled.Menu, contentDescription = "Menu") }
+                    TicketRingColorMenu(ringColor, onRingColorSelected)
                 },
                 actions = {
                     IconButton(onClick = {}) {
@@ -216,3 +249,42 @@ private fun androidx.compose.foundation.layout.RowScope.NavTab(
     )
 }
 
+
+/** Anchored, scrollable palette menu for the ticket animation. */
+@Composable
+private fun TicketRingColorMenu(
+    currentColor: TicketRingColor,
+    onSelect: (TicketRingColor) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(Icons.Filled.Menu, contentDescription = "Ring colors")
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.heightIn(max = 432.dp),
+        ) {
+            TicketRingColor.entries.forEach { choice ->
+                val isSelected = choice == currentColor
+                DropdownMenuItem(
+                    text = { Text(choice.label) },
+                    leadingIcon = {
+                        Box(Modifier.size(20.dp).background(choice.colors.ring, CircleShape))
+                    },
+                    trailingIcon = if (isSelected) {
+                        { Icon(Icons.Filled.Check, contentDescription = null) }
+                    } else {
+                        null
+                    },
+                    modifier = Modifier.semantics { selected = isSelected },
+                    onClick = {
+                        expanded = false
+                        onSelect(choice)
+                    },
+                )
+            }
+        }
+    }
+}
