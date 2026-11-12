@@ -21,7 +21,7 @@ The canonical app is the native Android project at the repository root:
 
 Android and the PWA draw the ticket animation in the shared Compose `TicketAnimation` canvas. Its radius and duration table follows each frame of `LeFauxPassRN/assets/animation.webp`. Edit `TicketAnimationColors` to change the default ring, paper, background, or shadow. The inset is shaded from the selected ring color. The static logo is cropped from the reference.
 
-The hamburger menu on My tickets opens a color wheel, with brightness and hex input for choosing the ring color. The choice and the one-time tip shown on the first visit to My tickets are stored in Android preferences or the browser’s local storage. Version `3.0` defaults to the reference pink (`#C57A98`) when no color is saved. Existing preset selections carry over. When changing a shipped palette color, increment `versionMajor` in `version.properties`, reset minor and patch to zero, and tag the resulting commit with the new `MAJOR.0` version.
+The hamburger menu on My tickets opens a color wheel, with brightness and hex input for choosing the ring color. The choice and the one-time tip shown on the first visit to My tickets are stored in Android preferences or the browser’s local storage. Version `4.0.0` defaults to pink (`#FF9EC4`) when no color is saved. Existing preset selections carry over. When changing a shipped palette color, increment `versionMajor` in `version.properties`, reset minor and patch to zero, and tag the resulting commit with the new `MAJOR.0.0` version.
 
 “Need more?” below the wheel opens an email draft for suggesting another ring color. The link beneath it opens the GitHub repository.
 
@@ -73,16 +73,11 @@ gradle/libs.versions.toml
 
 ## CI and releases
 
-`.github/workflows/build-apk.yml` builds debug APKs and publishes them from version-tag pushes. It also creates a GitHub issue when the Gradle build fails.
+`.github/workflows/build-apk.yml` builds debug APKs for branch pushes and pull requests targeting `master`. It creates a GitHub issue when the Gradle build fails.
 
-Current workflow behavior:
+The [central Android GitHub Release workflow](https://github.com/HereLiesAz/workflows/blob/main/.github/workflows/android-github-release.yml) builds signed release APKs with `assembleRelease` and publishes them under the three-part version tag. Debug APKs are for CI.
 
-- pushes: all branches are built;
-- pull requests targeting `master` are built;
-- pushes of version tags beginning with a digit or with `v` followed by a digit build the tagged commit and publish a GitHub release with that exact tag as its title;
-- each new release contains the debug APK and build-tools archive. Publishing skips tags that already have a published release. An existing draft stops publication for review.
-
-CI passes the repository commit count as Android `versionCode`, and the APK `versionName` is `major.minor.patch.build`. This gives the updater a monotonic version to compare.
+CI uses the repository commit count as Android `versionCode` and the APK version name has the form `major.minor.patch.build`. The updater uses that code to identify upgrades.
 
 ## Repository map
 
