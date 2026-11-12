@@ -40,8 +40,7 @@ internal fun TicketAnimation(
         while (true) {
             withFrameNanos { now ->
                 val elapsed = ((now - start) / 1_000_000L % frameEnds.last()).toInt()
-                val boundary = frameEnds.binarySearch(elapsed + 1)
-                frameIndex.intValue = if (boundary >= 0) boundary else -boundary - 1
+                frameIndex.intValue = frameEnds.indexOfFirst { it > elapsed }
             }
         }
     }
