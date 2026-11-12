@@ -4,18 +4,6 @@
 
 LeFauxPass is an unofficial Android UI prototype for a transit-ticket-style screen. It is not affiliated with, endorsed by, or an official product of the New Orleans Regional Transit Authority.
 
-## Current implementation
-
-The canonical app is the native Android project at the repository root:
-
-- **Application ID:** `com.hereliesaz.lefauxpass`
-- **UI:** Kotlin + Jetpack Compose
-- **Minimum Android:** API 26
-- **Compile / target SDK:** 37
-- **Media playback:** AndroidX Media3 / ExoPlayer
-- **Default branch:** `master`
-
-`LeFauxPassRN/` is an alternate React Native prototype. `rta-ticket-clone/` is a historical web implementation. Neither is built by the root Android release workflow.
 
 ## Animation
 
@@ -25,9 +13,6 @@ The hamburger menu on My tickets opens a color wheel, with brightness and hex in
 
 “Need more?” below the wheel opens an email draft for suggesting another ring color. The link beneath it opens the GitHub repository.
 
-The UI is Compose Multiplatform (`shared/`), built both as the Android app (`app/`) and as a PWA deployed to GitHub Pages (`./gradlew :shared:wasmJsBrowserDistribution`; workflow `deploy-pwa.yml`). The app opens on a dark "Ticket Details" screen (`TicketDetailsScreen.kt`). "Activate ticket" raises a confirmation bottom sheet; "Activate" moves to the animated ticket screen. Back from the ticket screen opens "My tickets" (`MyTicketsScreen.kt`); tapping the green active-ride card returns to the animation. Navigation state is held for the session only. On the web, expiration is stored in localStorage and the browser back button maps to in-app back.
-
-The similarly named WebP assets under `LeFauxPassRN/` and `rta-ticket-clone/` belong to those separate implementations and do not control the native Android app.
 
 ## Ticket state
 
@@ -50,34 +35,6 @@ The updater:
 
 Android still requires the user to approve the system package-installer prompt; LeFauxPass does not attempt privileged or silent installation.
 
-The app therefore declares:
-
-- `android.permission.INTERNET`
-- `android.permission.REQUEST_INSTALL_PACKAGES`
-
-## Build
-
-From the repository root:
-
-```sh
-./gradlew assembleDebug
-```
-
-The Gradle daemon and CI are pinned to Temurin/JDK 21, matching the app's Java/Kotlin JVM target 21.
-
-Dependency versions are centralized in:
-
-```
-gradle/libs.versions.toml
-```
-
-## CI and releases
-
-`.github/workflows/build-apk.yml` builds debug APKs for branch pushes and pull requests targeting `master`. It creates a GitHub issue when the Gradle build fails.
-
-The [central Android GitHub Release workflow](https://github.com/HereLiesAz/workflows/blob/main/.github/workflows/android-github-release.yml) builds signed release APKs with `assembleRelease` and publishes them under the three-part version tag. Debug APKs are for CI.
-
-CI uses the repository commit count as Android `versionCode` and the APK version name has the form `major.minor.patch.build`. The updater uses that code to identify upgrades.
 
 ## Repository map
 
