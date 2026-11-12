@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        GitHubUpdater.resumePendingInstall(this)
+        lifecycleScope.launch { GitHubUpdater.resumePendingInstall(this@MainActivity) }
     }
 }
 
