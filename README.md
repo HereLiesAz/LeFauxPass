@@ -17,13 +17,9 @@ The canonical app is the native Android project at the repository root:
 
 ## Animation
 
-The native app's live animation is:
+Android and the PWA draw the ticket animation in the shared Compose `TicketAnimation` canvas. Its radius and duration table follows each frame of `LeFauxPassRN/assets/animation.webp`. Edit `TicketAnimationColors` to change the pink ring, inset, paper, background, or shadow. The static logo is cropped from the reference.
 
-```
-app/src/main/res/raw/animation.mp4
-```
-
-`MainActivity.kt` loads it as `R.raw.animation` with Media3, starts playback automatically, and loops it continuously without player controls. The replacement MP4 currently in `master` is the source used by native Android builds.
+The hamburger menu on My tickets changes the ring color. The choice and the one-time tip shown on the first visit to My tickets are stored in Android preferences or the browser’s local storage. Pink remains the default for version `3.0`. When changing a shipped palette color, increment `versionMajor` in `version.properties`, reset minor and patch to zero, and tag the resulting commit with the new `MAJOR.0` version.
 
 The UI is Compose Multiplatform (`shared/`), built both as the Android app (`app/`) and as a PWA deployed to GitHub Pages (`./gradlew :shared:wasmJsBrowserDistribution`; workflow `deploy-pwa.yml`). The app opens on a dark "Ticket Details" screen (`TicketDetailsScreen.kt`). "Activate ticket" raises a confirmation bottom sheet; "Activate" moves to the animated ticket screen. Back from the ticket screen opens "My tickets" (`MyTicketsScreen.kt`); tapping the green active-ride card returns to the animation. Navigation state is held for the session only. On the web, expiration is stored in localStorage and the browser back button maps to in-app back.
 

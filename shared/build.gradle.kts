@@ -46,8 +46,3 @@ kotlin {
 compose.resources {
     packageOfResClass = "com.hereliesaz.lefauxpass.shared.resources"
 }
-
-// The PWA serves the same animation as the Android app; no duplicate copy in source control.
-tasks.named<ProcessResources>("wasmJsProcessResources") {
-    from(rootProject.file("app/src/main/res/raw/animation.mp4"))
-}
