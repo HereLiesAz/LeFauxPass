@@ -121,38 +121,41 @@ object GitHubUpdater {
         }
     }
 
-    fun resumePendingInstall(context: Context) {
-        val appContext = context.applicationContext
-        val prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    /** Resumes installation after permission is granted, serialized with active downloads. */
+    suspend fun resumePendingInstall(context: Context) {
+        updateMutex.withLock {
+            val appContext = context.applicationContext
+            val prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-        if (!prefs.getBoolean(KEY_WAITING_FOR_INSTALL_PERMISSION, false)) {
-            return
+            if (!prefs.getBoolean(KEY_WAITING_FOR_INSTALL_PERMISSION, false)) {
+                return
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                !appContext.packageManager.canRequestPackageInstalls()
+            ) {
+                return
+            }
+
+            prefs.edit().putBoolean(KEY_WAITING_FOR_INSTALL_PERMISSION, false).apply()
+
+            val updateFile = File(appContext.cacheDir, UPDATE_FILE_NAME)
+            if (!updateFile.exists()) {
+                return
+            }
+
+            val archiveInfo = getArchivePackageInfo(appContext, updateFile)
+            if (archiveInfo == null ||
+                archiveInfo.packageName != appContext.packageName ||
+                PackageInfoCompat.getLongVersionCode(archiveInfo) <= installedVersionCode(appContext) ||
+                !hasMatchingSigner(appContext, archiveInfo)
+            ) {
+                updateFile.delete()
+                return
+            }
+
+            launchPackageInstaller(appContext, updateFile)
         }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-            !appContext.packageManager.canRequestPackageInstalls()
-        ) {
-            return
-        }
-
-        prefs.edit().putBoolean(KEY_WAITING_FOR_INSTALL_PERMISSION, false).apply()
-
-        val updateFile = File(appContext.cacheDir, UPDATE_FILE_NAME)
-        if (!updateFile.exists()) {
-            return
-        }
-
-        val archiveInfo = getArchivePackageInfo(appContext, updateFile)
-        if (archiveInfo == null ||
-            archiveInfo.packageName != appContext.packageName ||
-            PackageInfoCompat.getLongVersionCode(archiveInfo) <= installedVersionCode(appContext) ||
-            !hasMatchingSigner(appContext, archiveInfo)
-        ) {
-            updateFile.delete()
-            return
-        }
-
-        launchPackageInstaller(appContext, updateFile)
     }
 
     private fun isAutoCheckDue(context: Context): Boolean {
