@@ -1,5 +1,7 @@
 # LeFauxPass
 
+**[Latest Android APK release](https://github.com/HereLiesAz/LeFauxPass/releases)**
+
 LeFauxPass is an unofficial Android UI prototype for a transit-ticket-style screen. It is not affiliated with, endorsed by, or an official product of the New Orleans Regional Transit Authority.
 
 ## Current implementation
