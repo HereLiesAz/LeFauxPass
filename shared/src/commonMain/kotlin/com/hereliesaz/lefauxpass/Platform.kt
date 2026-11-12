@@ -2,13 +2,12 @@ package com.hereliesaz.lefauxpass
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 /**
  * Everything the shared UI needs from its host. Android implements it in
- * `:app` (ExoPlayer, SharedPreferences, GitHub updater); the PWA implements
- * it in `wasmJsMain` (HTML video overlay, localStorage, browser history).
+ * `:app` (SharedPreferences, GitHub updater); the PWA implements
+ * it in `wasmJsMain` (localStorage, browser history).
  */
 interface PlatformHooks {
     /** Stored ticket expiration as epoch milliseconds, or null if none. */
@@ -20,10 +19,6 @@ interface PlatformHooks {
 
     /** Update check; `manual` bypasses throttling and reports "up to date". Null where unsupported. */
     val checkForUpdates: ((manual: Boolean) -> Unit)?
-
-    /** Looping ticket animation (`app/src/main/res/raw/animation.mp4`). */
-    @Composable
-    fun AnimationPlayer(modifier: Modifier, onReady: () -> Unit)
 
     /** Tints the status/navigation bars (Android) or browser theme color (web). */
     @Composable

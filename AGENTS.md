@@ -7,7 +7,7 @@ This file is the working guide for automated coding agents operating on **HereLi
 The canonical implementation is the Compose Multiplatform project at the repository root:
 
 - module: `:shared` — all UI (common Compose), Android library + Kotlin/Wasm PWA targets
-- module: `:app` — Android host (`MainActivity`, ExoPlayer, `ExpirationManager`, `GitHubUpdater`)
+- module: `:app` — Android host (`MainActivity`, `ExpirationManager`, `GitHubUpdater`)
 - package / application ID: `com.hereliesaz.lefauxpass`
 - UI: Kotlin + Compose Multiplatform (`shared/src/commonMain`)
 - default branch: `master`
@@ -21,17 +21,11 @@ The canonical implementation is the Compose Multiplatform project at the reposit
 
 `App.kt` (shared) opens on `TicketDetailsScreen`; "Activate ticket" shows a confirmation bottom sheet, "Activate" switches to the ticket screen, and back (arrow or system) from the ticket screen opens `MyTicketsScreen` (`MyTicketsScreen.kt`), whose green active-ride card returns to the ticket screen. The ticket screen renders live clock, expiration information, and the looping animation.
 
-Screens live in `shared/src/commonMain`. Platform specifics go through `PlatformHooks` (`Platform.kt`): Android implements it in `MainActivity.kt`; the PWA in `shared/src/wasmJsMain` (`WebPlatformHooks.kt`: localStorage, an HTML `<video>` overlaid on the Compose canvas, browser-history back). The PWA has no updater; new deploys reach it through its network-first service worker (`sw.js`).
+Screens live in `shared/src/commonMain`. Platform specifics go through `PlatformHooks` (`Platform.kt`): Android implements it in `MainActivity.kt`; the PWA in `shared/src/wasmJsMain` (`WebPlatformHooks.kt`: localStorage, browser-history back). The PWA has no updater; new deploys reach it through its network-first service worker (`sw.js`).
 
 The Le Pass card, the RTA logo square, and the My tickets tab icons are bitmaps sliced from reference screenshots (`shared/src/commonMain/composeResources/drawable`); the repo has no script font for the "Le Pass" watermark.
 
-The production animation asset is:
-
-```
-app/src/main/res/raw/animation.mp4
-```
-
-It is referenced as `R.raw.animation` and played through Media3 / ExoPlayer on Android. The PWA build copies the same file into its output (`wasmJsProcessResources`); there is no second copy in source control. Replacing a WebP in either legacy implementation does not replace the native animation.
+The production animation is `TicketAnimation.kt` in shared Compose. Android and the PWA draw editable circle layers from a radius and duration table measured from `LeFauxPassRN/assets/animation.webp`. Change the palette in `TicketAnimationColors`. The renderer uses a static logo crop from the same source.
 
 `ExpirationManager.kt` persists the expiration timestamp locally in `SharedPreferences`.
 
@@ -84,13 +78,13 @@ Branch pushes and pull requests build without publishing releases. Version-tag p
 `version.properties` is the root version input. At this documentation revision it contains:
 
 ```
-versionMajor=2
+versionMajor=3
 versionMinor=0
 versionPatch=0
 versionBuild=6
 ```
 
-The Android Gradle configuration uses CI's `versionBuild` as `versionCode` and produces `versionName` as `major.minor.patch.build`. CI uses the same four-part version in APK asset names.
+The Android Gradle configuration uses CI's `versionBuild` as `versionCode` and produces `versionName` as `major.minor.patch.build`. CI uses the same four-part version in APK asset names. A ticket animation color change increments `versionMajor`, resets minor and patch to zero, and uses a new `MAJOR.0` release tag. Pink is `3.0`.
 
 ## Change discipline
 
