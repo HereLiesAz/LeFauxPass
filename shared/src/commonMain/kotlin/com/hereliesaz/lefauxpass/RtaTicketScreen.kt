@@ -1,6 +1,5 @@
 package com.hereliesaz.lefauxpass
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,10 +43,9 @@ import kotlinx.coroutines.delay
 /** The activated ticket: live clock, expiration, and the looping animation. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RtaTicketScreen(onBack: () -> Unit = {}) {
+internal fun RtaTicketScreen(onBack: () -> Unit, ringColors: TicketAnimationColors) {
     val platform = LocalPlatform.current
     var expirationTime by remember { mutableStateOf<Long?>(null) }
-    var isVideoReady by remember { mutableStateOf(false) }
 
     platform.SystemBarColor(TopBarColor)
 
@@ -100,8 +96,7 @@ fun RtaTicketScreen(onBack: () -> Unit = {}) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 24.dp)
-                    .alpha(if (isVideoReady) 1f else 0f),
+                    .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(63.dp))
@@ -123,12 +118,11 @@ fun RtaTicketScreen(onBack: () -> Unit = {}) {
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
-                platform.AnimationPlayer(
+                TicketAnimation(
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
-                        .aspectRatio(1f)
-                        .background(Color.White),
-                    onReady = { isVideoReady = true }
+                        .aspectRatio(1f),
+                    colors = ringColors,
                 )
                 Spacer(modifier = Modifier.height(22.dp))
                 LiveClock()
@@ -136,9 +130,6 @@ fun RtaTicketScreen(onBack: () -> Unit = {}) {
                 TicketInfoCard(expirationTime = expirationTime)
                 Spacer(modifier = Modifier.height(20.dp))
                 Spacer(modifier = Modifier.weight(1f))
-            }
-            if (!isVideoReady) {
-                CircularProgressIndicator()
             }
         }
     }
