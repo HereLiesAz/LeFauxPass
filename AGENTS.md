@@ -84,7 +84,7 @@ versionPatch=0
 versionBuild=6
 ```
 
-The Android Gradle configuration uses CI's `versionBuild` as `versionCode` and produces `versionName` as `major.minor.patch.build`. CI uses the same four-part version in APK asset names. A change to a shipped ring palette color increments `versionMajor`, resets minor and patch to zero, and uses a new `MAJOR.0` release tag. Pink is `3.0`. My tickets offers a saved ring palette through its hamburger menu and shows a tip on the first visit. Android uses SharedPreferences and the PWA uses localStorage for both preferences.
+The Android Gradle configuration uses CI's `versionBuild` as `versionCode` and produces `versionName` as `major.minor.patch.build`. CI uses the same four-part version in APK asset names. A change to a shipped ring palette color increments `versionMajor`, resets minor and patch to zero, and uses a new `MAJOR.0` release tag. Pink is `3.0`. The My tickets hamburger menu opens a color wheel with brightness and hex input. Applying a color saves its ARGB value and changes the ring and inset. “Need more?” opens an email draft. The screen shows a tip on the first visit. Android uses SharedPreferences and the PWA uses localStorage for both preferences.
 
 ## Change discipline
 

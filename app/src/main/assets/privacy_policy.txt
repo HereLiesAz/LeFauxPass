@@ -43,5 +43,7 @@ This policy may be updated when application behavior changes. The version bundle
 Contact
 =======
 
+“Need more?” in the ring color picker can open an email draft to the developer with a prompt for the requested color. Your email app handles any message you choose to send.
+
 Questions or corrections can be submitted through the LeFauxPass GitHub repository issue tracker:
 https://github.com/HereLiesAz/LeFauxPass/issues

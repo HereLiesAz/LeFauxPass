@@ -47,8 +47,8 @@ private class AndroidPlatformHooks(private val activity: AppCompatActivity) : Pl
 
     override fun loadRingColor(): String? = ticketPreferences.getString("ring_color", null)
 
-    override fun saveRingColor(colorId: String) {
-        ticketPreferences.edit().putString("ring_color", colorId).apply()
+    override fun saveRingColor(argb: String) {
+        ticketPreferences.edit().putString("ring_color", argb).apply()
     }
 
     override fun hasSeenRingColorTip(): Boolean = ticketPreferences.getBoolean("ring_color_tip_seen", false)
