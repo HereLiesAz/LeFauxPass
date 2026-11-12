@@ -66,25 +66,17 @@ Do not regenerate a vendor-specific daemon toolchain file unless required. A pre
 3. generates the signing keystore from repository secrets,
 4. sets up Temurin JDK 21,
 5. runs `assembleDebug` with the commit count supplied as `versionBuild`,
-6. creates a GitHub issue on build failure,
-7. publishes a new GitHub release for successful version-tag pushes, using the triggering tag as the release title.
+6. creates a GitHub issue on build failure.
 
 `.github/workflows/deploy-pwa.yml` builds the PWA on every push/PR and deploys it to GitHub Pages from `master` only. Pages must be set to source "GitHub Actions" in repository settings.
 
-Branch pushes and pull requests build without publishing releases. Version-tag pushes publish the APK and build-tools archive from the tagged commit. The workflow skips tags with published releases and leaves their assets intact. An existing draft stops publication for review. The in-app updater discovers new APKs through the Releases collection, including prereleases.
+Branch pushes and pull requests run debug CI. The central Android GitHub Release workflow in `HereLiesAz/workflows` builds signed APKs with `assembleRelease` and publishes them under the three-part version tag. The in-app updater discovers APKs through the Releases collection, including older prereleases.
 
 ## Versioning
 
-`version.properties` is the root version input. At this documentation revision it contains:
+`version.properties` is the root version input. It records the version components and the last published Android version code.
 
-```
-versionMajor=3
-versionMinor=0
-versionPatch=0
-versionBuild=6
-```
-
-The Android Gradle configuration uses CI's `versionBuild` as `versionCode` and produces `versionName` as `major.minor.patch.build`. CI uses the same four-part version in APK asset names. A change to a shipped ring palette color increments `versionMajor`, resets minor and patch to zero, and uses a new `MAJOR.0` release tag. Pink is `3.0`. The My tickets hamburger menu opens a color wheel with brightness and hex input. Applying a color saves its ARGB value and changes the ring and inset. “Need more?” opens an email draft. The screen shows a tip on the first visit. Android uses SharedPreferences and the PWA uses localStorage for both preferences.
+The Android Gradle configuration uses CI's `versionBuild` as `versionCode` and produces `versionName` as `major.minor.patch.build`. CI uses the same four-part version in APK asset names. A change to a shipped ring palette color increments `versionMajor`, resets minor and patch to zero, and uses a new `MAJOR.0.0` release tag. The default pink in `4.0.0` is `#FF9EC4`. The My tickets hamburger menu opens a color wheel with brightness and hex input. Applying a color saves its ARGB value and changes the ring and inset. “Need more?” opens an email draft. The screen shows a tip on the first visit. Android uses SharedPreferences and the PWA uses localStorage for both preferences.
 
 ## Change discipline
 

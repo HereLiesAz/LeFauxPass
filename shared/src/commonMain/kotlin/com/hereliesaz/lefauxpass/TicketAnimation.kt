@@ -19,7 +19,7 @@ import kotlin.math.roundToInt
 
 /** Colors for the ticket animation's circle layers, with a darker inset of the selected ring. */
 internal data class TicketAnimationColors(
-    val ring: Color = Color(0xFFC57A98),
+    val ring: Color = Color(0xFFFF9EC4),
     val paper: Color = Color.White,
     val background: Color = Color.White,
     val shadow: Color = Color.Black,
