@@ -14,9 +14,9 @@ interface PlatformHooks {
     fun loadExpiration(): Long?
     fun saveExpiration(epochMs: Long)
 
-    /** Stored ring palette identifier, or null for the default palette. */
+    /** Stored ring color as signed decimal ARGB or a legacy preset name. Null selects the default. */
     fun loadRingColor(): String?
-    fun saveRingColor(colorId: String)
+    fun saveRingColor(argb: String)
 
     /** Whether the user has already seen the ring color tip. */
     fun hasSeenRingColorTip(): Boolean

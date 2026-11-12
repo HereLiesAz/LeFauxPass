@@ -17,9 +17,11 @@ The canonical app is the native Android project at the repository root:
 
 ## Animation
 
-Android and the PWA draw the ticket animation in the shared Compose `TicketAnimation` canvas. Its radius and duration table follows each frame of `LeFauxPassRN/assets/animation.webp`. Edit `TicketAnimationColors` to change the pink ring, inset, paper, background, or shadow. The static logo is cropped from the reference.
+Android and the PWA draw the ticket animation in the shared Compose `TicketAnimation` canvas. Its radius and duration table follows each frame of `LeFauxPassRN/assets/animation.webp`. Edit `TicketAnimationColors` to change the default ring, paper, background, or shadow. The inset is shaded from the selected ring color. The static logo is cropped from the reference.
 
-The hamburger menu on My tickets changes the ring color. The choice and the one-time tip shown on the first visit to My tickets are stored in Android preferences or the browser’s local storage. Pink remains the default for version `3.0`. When changing a shipped palette color, increment `versionMajor` in `version.properties`, reset minor and patch to zero, and tag the resulting commit with the new `MAJOR.0` version.
+The hamburger menu on My tickets opens a color wheel, with brightness and hex input for choosing the ring color. The choice and the one-time tip shown on the first visit to My tickets are stored in Android preferences or the browser’s local storage. Version `3.0` defaults to the reference pink (`#C57A98`) when no color is saved. Existing preset selections carry over. When changing a shipped palette color, increment `versionMajor` in `version.properties`, reset minor and patch to zero, and tag the resulting commit with the new `MAJOR.0` version.
+
+“Need more?” below the wheel opens an email draft for suggesting another ring color.
 
 The UI is Compose Multiplatform (`shared/`), built both as the Android app (`app/`) and as a PWA deployed to GitHub Pages (`./gradlew :shared:wasmJsBrowserDistribution`; workflow `deploy-pwa.yml`). The app opens on a dark "Ticket Details" screen (`TicketDetailsScreen.kt`). "Activate ticket" raises a confirmation bottom sheet; "Activate" moves to the animated ticket screen. Back from the ticket screen opens "My tickets" (`MyTicketsScreen.kt`); tapping the green active-ride card returns to the animation. Navigation state is held for the session only. On the web, expiration is stored in localStorage and the browser back button maps to in-app back.
 
@@ -31,7 +33,7 @@ The expiration timestamp is stored locally in `SharedPreferences` by `Expiration
 
 ## Updates
 
-`GitHubUpdater` is a version-aware self-updater backed by GitHub Releases. It automatically checks at app launch (throttled to once every six hours) and can be forced manually from the top-right action.
+`GitHubUpdater` is a version-aware self-updater backed by GitHub Releases. It automatically checks when the animated ticket screen opens (throttled to once every six hours) and can be forced manually from the top-right action.
 
 The updater:
 

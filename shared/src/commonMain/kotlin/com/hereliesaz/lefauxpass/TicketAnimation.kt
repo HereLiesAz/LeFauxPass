@@ -17,33 +17,14 @@ import com.hereliesaz.lefauxpass.shared.resources.ticket_animation_logo
 import org.jetbrains.compose.resources.imageResource
 import kotlin.math.roundToInt
 
-/** Colors for the ticket animation's editable circle layers. */
+/** Colors for the ticket animation's circle layers, with a darker inset of the selected ring. */
 internal data class TicketAnimationColors(
-    val ring: Color = Color(0xFFEC2A90),
-    val ringInset: Color = Color(0xFFBD2173),
+    val ring: Color = Color(0xFFC57A98),
     val paper: Color = Color.White,
     val background: Color = Color.White,
     val shadow: Color = Color.Black,
-)
-
-/** Named ring palettes shown in My tickets. Other animation layers use the shared defaults. */
-internal enum class TicketRingColor(val label: String, val colors: TicketAnimationColors) {
-    Pink("Pink", TicketAnimationColors()),
-    Red("Red", TicketAnimationColors(Color(0xFFE53945), Color(0xFFB92332))),
-    Coral("Coral", TicketAnimationColors(Color(0xFFFF7167), Color(0xFFCE504C))),
-    Orange("Orange", TicketAnimationColors(Color(0xFFF78124), Color(0xFFC55E14))),
-    Gold("Gold", TicketAnimationColors(Color(0xFFE7A824), Color(0xFFB58114))),
-    Yellow("Yellow", TicketAnimationColors(Color(0xFFF4D32A), Color(0xFFC4A51C))),
-    Lime("Lime", TicketAnimationColors(Color(0xFF9DD231), Color(0xFF79A01C))),
-    Green("Green", TicketAnimationColors(Color(0xFF00A650), Color(0xFF008340))),
-    Mint("Mint", TicketAnimationColors(Color(0xFF57D9A6), Color(0xFF39AB7E))),
-    Teal("Teal", TicketAnimationColors(Color(0xFF00A59F), Color(0xFF007E7A))),
-    Turquoise("Turquoise", TicketAnimationColors(Color(0xFF23CFD8), Color(0xFF189CA7))),
-    LightBlue("Light blue", TicketAnimationColors(Color(0xFF65B9F6), Color(0xFF478DC4))),
-    RoyalBlue("Royal blue", TicketAnimationColors(Color(0xFF4169E1), Color(0xFF304DB2))),
-    Periwinkle("Periwinkle", TicketAnimationColors(Color(0xFF929BFF), Color(0xFF6F78CF))),
-    Purple("Purple", TicketAnimationColors(Color(0xFF8D48CC), Color(0xFF6D35A4))),
-    Lavender("Lavender", TicketAnimationColors(Color(0xFFC7A1F1), Color(0xFF9E76CC))),
+) {
+    val ringInset: Color = Color(ring.red * 0.8f, ring.green * 0.8f, ring.blue * 0.8f)
 }
 
 /** Plays the reference WebP's measured circle poses at their original frame boundaries. */

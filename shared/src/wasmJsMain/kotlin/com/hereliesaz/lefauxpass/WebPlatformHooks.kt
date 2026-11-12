@@ -29,9 +29,9 @@ object WebPlatformHooks : PlatformHooks {
     override fun loadRingColor(): String? =
         sessionRingColor ?: runCatching { localStorage.getItem(KEY_RING_COLOR) }.getOrNull()
 
-    override fun saveRingColor(colorId: String) {
-        sessionRingColor = colorId
-        runCatching { localStorage.setItem(KEY_RING_COLOR, colorId) }
+    override fun saveRingColor(argb: String) {
+        sessionRingColor = argb
+        runCatching { localStorage.setItem(KEY_RING_COLOR, argb) }
     }
 
     override fun hasSeenRingColorTip(): Boolean =
