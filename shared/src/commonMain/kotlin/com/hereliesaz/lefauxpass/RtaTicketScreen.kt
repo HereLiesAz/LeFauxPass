@@ -43,7 +43,7 @@ import kotlinx.coroutines.delay
 /** The activated ticket: live clock, expiration, and the looping animation. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RtaTicketScreen(onBack: () -> Unit = {}) {
+internal fun RtaTicketScreen(onBack: () -> Unit, ringColors: TicketAnimationColors) {
     val platform = LocalPlatform.current
     var expirationTime by remember { mutableStateOf<Long?>(null) }
 
@@ -122,6 +122,7 @@ fun RtaTicketScreen(onBack: () -> Unit = {}) {
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
                         .aspectRatio(1f),
+                    colors = ringColors,
                 )
                 Spacer(modifier = Modifier.height(22.dp))
                 LiveClock()
