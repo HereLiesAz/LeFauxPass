@@ -21,7 +21,7 @@ Android and the PWA draw the ticket animation in the shared Compose `TicketAnima
 
 The hamburger menu on My tickets opens a color wheel, with brightness and hex input for choosing the ring color. The choice and the one-time tip shown on the first visit to My tickets are stored in Android preferences or the browser’s local storage. Version `3.0` defaults to the reference pink (`#C57A98`) when no color is saved. Existing preset selections carry over. When changing a shipped palette color, increment `versionMajor` in `version.properties`, reset minor and patch to zero, and tag the resulting commit with the new `MAJOR.0` version.
 
-“Need more?” below the wheel opens an email draft for suggesting another ring color.
+“Need more?” below the wheel opens an email draft for suggesting another ring color. The link beneath it opens the GitHub repository.
 
 The UI is Compose Multiplatform (`shared/`), built both as the Android app (`app/`) and as a PWA deployed to GitHub Pages (`./gradlew :shared:wasmJsBrowserDistribution`; workflow `deploy-pwa.yml`). The app opens on a dark "Ticket Details" screen (`TicketDetailsScreen.kt`). "Activate ticket" raises a confirmation bottom sheet; "Activate" moves to the animated ticket screen. Back from the ticket screen opens "My tickets" (`MyTicketsScreen.kt`); tapping the green active-ride card returns to the animation. Navigation state is held for the session only. On the web, expiration is stored in localStorage and the browser back button maps to in-app back.
 

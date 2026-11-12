@@ -91,6 +91,10 @@ internal fun TicketRingColorPicker(
                         }
                     },
                 ) { Text("Need more?") }
+                TextButton(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = { uriHandler.openUri("https://github.com/HereLiesAz/LeFauxPass") },
+                ) { Text("GitHub repository") }
                 if (emailUnavailable) {
                     Text("Send your color suggestion to $ColorRequestEmail.")
                 }
