@@ -1,6 +1,7 @@
 package com.hereliesaz.lefauxpass
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -40,6 +41,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import com.hereliesaz.lefauxpass.shared.resources.Res
+import com.hereliesaz.lefauxpass.shared.resources.share_app_qr
+import org.jetbrains.compose.resources.painterResource
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -58,11 +62,37 @@ internal fun TicketRingColorPicker(
     var hsv by remember(currentColor) { mutableStateOf(WheelColor.from(currentColor)) }
     var hex by remember(currentColor) { mutableStateOf(currentColor.toRgbHex()) }
     var emailUnavailable by remember { mutableStateOf(false) }
+    var showShareCode by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
     val selectedColor = hex.toRingColorOrNull()
     val updateWheel: (WheelColor) -> Unit = { next ->
         hsv = next
         hex = next.toColor().toRgbHex()
+    }
+
+    if (showShareCode) {
+        AlertDialog(
+            onDismissRequest = { showShareCode = false },
+            title = { Text("Share this app") },
+            text = {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.share_app_qr),
+                        contentDescription = "QR code for the LeFauxPass Android APK download",
+                        modifier = Modifier.fillMaxWidth().aspectRatio(1f),
+                    )
+                    Text("Scan to download the Android app.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showShareCode = false }) { Text("Done") }
+            },
+        )
+        return
     }
 
     AlertDialog(
@@ -73,6 +103,10 @@ internal fun TicketRingColorPicker(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
+                TextButton(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = { showShareCode = true },
+                ) { Text("Share this app") }
                 RingColorWheel(
                     color = hsv,
                     onPick = { hue, saturation -> updateWheel(hsv.copy(hue = hue, saturation = saturation)) },
