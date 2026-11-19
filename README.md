@@ -9,7 +9,9 @@ LeFauxPass is an unofficial Android UI prototype for a transit-ticket-style scre
 
 Android and the PWA draw the ticket animation in the shared Compose `TicketAnimation` canvas. Its radius and duration table follows each frame of `LeFauxPassRN/assets/animation.webp`. Edit `TicketAnimationColors` to change the default ring, paper, background, or shadow. The inset is shaded from the selected ring color. The static logo is cropped from the reference.
 
-The hamburger menu on My tickets opens a color wheel, with brightness and hex input for choosing the ring color. The choice and the one-time tip shown on the first visit to My tickets are stored in Android preferences or the browser’s local storage. Version `4.0.0` defaults to pink (`#FF9EC4`) when no color is saved. Existing preset selections carry over. When changing a shipped palette color, increment `versionMajor` in `version.properties`, reset minor and patch to zero, and tag the resulting commit with the new `MAJOR.0.0` version.
+The hamburger menu on My tickets opens a color wheel, with brightness and hex input for choosing the ring color. The choice and the one-time tip shown on the first visit to My tickets are stored in Android preferences or the browser’s local storage. Version `3.0.1` defaults to pink (`#FF9EC4`) when no color is saved. Existing preset selections carry over.
+
+“Share this app” at the top opens an offline QR code for the permanent workflows gateway download URL. Each scan resolves the latest regular GitHub release and redirects to its release APK. Browser download restrictions may require tapping the download link.
 
 “Need more?” below the wheel opens an email draft for suggesting another ring color. The link beneath it opens the GitHub repository.
 
